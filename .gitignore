@@ -1,0 +1,31 @@
+# User-specific configuration
+
+# Media files (can be large)
+dateien/
+
+# Cache files
+cache/
+
+# Build/temporary files
+*.tmp
+*.log
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test/development files (uncomment if needed)
+# index2*.html
+# index3*.html
+# content1/
+# generate_password.php
+# clean_markdown.php
+# *.ps1

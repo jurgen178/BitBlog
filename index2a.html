@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>📚 Admin - Kategorien-Übersicht</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            line-height: 1.1;
+            color: #000;
+            background: #fff;
+            padding: 0.8rem;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        .header {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.75rem;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0 0 0.25rem 0;
+            color: #000;
+        }
+        .header .stats {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .categories-container {
+            column-count: 3;
+            column-gap: 2rem;
+            column-fill: balance;
+        }
+        @media (max-width: 900px) {
+            .categories-container {
+                column-count: 2;
+            }
+        }
+        @media (max-width: 600px) {
+            .categories-container {
+                column-count: 1;
+            }
+        }
+        .category-section {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .category-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 0 0 0.5rem 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.25rem;
+        }
+        .category-title a {
+            color: #000;
+            text-decoration: none;
+        }
+        .category-title a:hover {
+            color: #0b79d0;
+            text-decoration: underline;
+        }
+        .posts-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .post-item {
+            margin-bottom: 0.4rem;
+        }
+        .post-link {
+            text-decoration: none;
+            color: #0b79d0;
+            font-size: 0.8rem;
+            line-height: 1.1;
+            display: block;
+        }
+        .post-link:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            display: inline-block;
+            color: #000;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="http://localhost:8000/" class="back-link">← Zurück zum Blog</a>
+            <h1>📚 Admin - Kategorien-Übersicht</h1>
+            <div class="stats">1 Beiträge in 1 Kategorien</div>
+        </div>
+        
+        <div class="categories-container">
+            <div class="category-section">
+                <h2 class="category-title">
+                    <a href="http://localhost:8000/index.php?tag=Querbeet">Querbeet (1)</a>
+                </h2>
+                <ul class="posts-list">
+                    <li class="post-item">
+                        <a href="http://localhost:8000/admin.php?action=editor&id=1" class="post-link" target="_blank" rel="noopener">BitBlog (15.11.2025)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Erstellt mit [BitBlog](https://github.com/jurgen178/bitblog) - Ein einfaches, dateibasiertes PHP-Blog-System

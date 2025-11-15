@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Redirect to RSS</title>
+  <id>http://localhost:8000/feed.xml</id>
+  <updated>2025-11-05T00:00:00Z</updated>
+  <link rel="alternate" type="application/rss+xml" href="http://localhost:8000/rss.php" />
+  <entry>
+    <title>RSS Feed Moved</title>
+    <id>http://localhost:8000/rss.php</id>
+    <updated>2025-11-05T00:00:00Z</updated>
+    <summary>This feed has moved to /rss.php - Please update your RSS reader</summary>
+    <link href="http://localhost:8000/rss.php" />
+  </entry>
+</feed>

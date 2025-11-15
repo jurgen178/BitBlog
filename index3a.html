@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>📅 Admin - Chronologische Übersicht</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            line-height: 1.1;
+            color: #000;
+            background: #fff;
+            padding: 0.8rem;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        .header {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.75rem;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0 0 0.25rem 0;
+            color: #000;
+        }
+        .header .stats {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .posts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .posts-table th {
+            background: #f0f0f0;
+            padding: 0.4rem;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+        .posts-table td {
+            padding: 0.3rem 0.4rem;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+            line-height: 1.0;
+        }
+        .posts-table td.post-date {
+            vertical-align: middle;
+        }
+        .posts-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+        .post-title {
+            color: #0b79d0;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+        .post-title:hover {
+            text-decoration: underline;
+        }
+        .post-date {
+            white-space: nowrap;
+            color: #666;
+            font-size: 0.7rem;
+        }
+        .post-categories {
+            font-size: 0.65rem;
+        }
+        .category-tag {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            padding: 1px 4px;
+            margin: 1px 1px 1px 0;
+            border-radius: 2px;
+            text-decoration: none;
+            border: 1px solid #dee2e6;
+        }
+        .category-tag:hover {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .back-link {
+            display: inline-block;
+            color: #000;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        @media (max-width: 768px) {
+            .posts-table {
+                font-size: 0.75rem;
+            }
+            .posts-table th,
+            .posts-table td {
+                padding: 0.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="http://localhost:8000/" class="back-link">← Zurück zum Blog</a>
+            <h1>📅 Admin - Chronologische Übersicht</h1>
+            <div class="stats">1 Beiträge insgesamt</div>
+        </div>
+        
+        <table class="posts-table">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Titel</th>
+                    <th>Kategorien</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="post-date">15.11.2025</td>
+                    <td><a href="http://localhost:8000/admin.php?action=editor&id=1" class="post-title" target="_blank" rel="noopener">BitBlog</a></td>
+                    <td class="post-categories">
+<span class="category-tag"><a href="http://localhost:8000/index.php?tag=Querbeet" class="category-tag">Querbeet</a></span>
+</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

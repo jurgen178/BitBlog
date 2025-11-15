@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>RSS Feed Moved</title>
+    <link>http://localhost:8000</link>
+    <description>This RSS feed has moved to /rss.php for dynamic content generation</description>
+    <item>
+      <title>Feed Moved to /rss.php</title>
+      <link>http://localhost:8000/rss.php</link>
+      <guid>http://localhost:8000/rss.php</guid>
+      <description>Please update your RSS reader to use: http://localhost:8000/rss.php</description>
+      <pubDate>Sat, 09 Nov 2024 00:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
