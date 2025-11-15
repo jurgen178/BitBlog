@@ -19,19 +19,28 @@
 - 🔐 **Private Posts**: Share drafts via secure token URLs
 
 <br />
+<br />
 <img width="2496" height="1488" alt="blog" src="https://github.com/user-attachments/assets/cf458ad6-90e1-4c07-a8c1-26185739e2d2" />  
+<br />
 <br />
 <img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/9cc7a2f7-b693-46b5-a744-fb47f522010f" />  
 <br />
+<br />
 <img width="2496" height="1490" alt="editor" src="https://github.com/user-attachments/assets/0f0633fb-53ea-42f1-8665-4c478cbe7931" />  
+<br />
 <br />
 <img width="2496" height="1485" alt="signature-editor" src="https://github.com/user-attachments/assets/cff633e3-8520-4442-bea7-47fa445d17d0" />  
 <br />
+<br />
 <img width="2496" height="1486" alt="settings" src="https://github.com/user-attachments/assets/965293ac-2dc3-472e-8624-023963d76905" />  
+<br />
 <br />
 <img width="2496" height="1485" alt="index3" src="https://github.com/user-attachments/assets/c87f74d0-f949-430d-a259-3fd419a19717" />  
 <br />
+<br />
 <img width="2496" height="1483" alt="index2" src="https://github.com/user-attachments/assets/2f8984e9-d778-4eeb-a544-780276de6fb5" />
+<br />
+<br />
 <br />
 
 ## 🚀 Quick Start
@@ -44,7 +53,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/bitblog.git
+   git clone https://github.com/jurgen178/bitblog.git
    cd bitblog
    ```
 
@@ -89,7 +98,7 @@
 3. **Configure Apache:**
    - Point document root to the BitBlog directory
    - Enable `.htaccess` if using URL rewriting
-   - Ensure PHP is enabled and version 7.4+ is available
+   - Ensure PHP is enabled and version 8.0+ is available
 
 4. **Security:**
    - Set up admin credentials in `src/Config.php`
@@ -177,7 +186,6 @@ Runtime settings can also be changed via the admin panel (`/admin.php?settings`)
 - **Private Posts**: Secure token-based access for draft sharing
 
 **⚠️ Important Security Notes:**
-- Never commit `settings.json` with sensitive data
 - Change admin credentials before production deployment
 - Use HTTPS in production
 - Keep PHP updated
@@ -197,21 +205,51 @@ See [TRANSLATION_GUIDE.md](TRANSLATION_GUIDE.md) for details.
 
 ## 📖 Writing Posts
 
-Posts are Markdown files with YAML front matter:
+### Using the Web Editor (Recommended)
+
+1. **Access the admin panel:**
+   - Navigate to `http://yoursite.com/admin.php`
+   - Log in with your credentials
+
+2. **Create a new post:**
+   - Click "📝 New Post" in the admin panel
+   - Fill in the title, date, and status (draft/published/private)
+   - Add tags to organize your content
+   - Write your content using the built-in Monaco Editor (Visual Studio Code editor)
+   - See live preview of your post in real-time
+
+3. **Editor features:**
+   - **Markdown toolbar**: Quick buttons for bold, italic, code, links, tables
+   - **Live preview**: See rendered output as you type
+   - **Fullscreen mode**: Distraction-free writing (F11)
+   - **Dark/Light theme**: Switch editor theme
+   - **Font size control**: Adjust text size (A+/A-)
+   - **Keyboard shortcuts**: Ctrl+B (bold), Ctrl+I (italic), Ctrl+K (link), Ctrl+S (save)
+
+4. **Post status:**
+   - **Published**: Visible to everyone
+   - **Draft**: Hidden from public, only visible in admin
+   - **Private**: Only accessible via secure token URL (perfect for sharing drafts)
+
+### Manual File Creation
+
+Posts are Markdown files with YAML front matter stored in `content/posts/`:
 
 ```markdown
 ---
 title: My Blog Post
-date: 2024-11-09T14:30:00Z
 status: published
 tags: [php, blog, web]
-summary: A short description of the post
 ---
 
 # My Blog Post
 
 Content goes here in **Markdown** format.
 ```
+
+**File naming convention:** `YYYY-MM-DDTHHMM.ID.md` (e.g., `2025-11-15T1430.123.md`)
+- The date in the filename is in UTC
+- The ID is auto-generated and unique
 
 ## 🎯 Admin Features
 
@@ -244,7 +282,7 @@ Content goes here in **Markdown** format.
 
 ## 📋 Requirements
 
-- PHP 7.4+ (tested with PHP 8.4)
+- PHP 8.0+ (tested with PHP 8.4)
 - No database required
 - Web server with PHP support
 
