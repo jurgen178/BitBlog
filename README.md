@@ -267,14 +267,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Built with [ParsedownExtra](https://github.com/erusev/parsedown-extra) for Markdown processing
 - Inspired by simple, file-based CMS systems
 
-## 📞 Support
-
-- 🐛 [Report bugs](https://github.com/yourusername/bitblog/issues)
-- 💡 [Request features](https://github.com/yourusername/bitblog/issues)
-- 📖 [Documentation](https://github.com/yourusername/bitblog/wiki)
-
 ---
 
-**BitBlog** - Simple, secure, and fast! 🚀
+**BitBlog** - Lightweight, secure, and fast!
 
-Made with ❤️ by the BitBlog community
