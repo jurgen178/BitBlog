@@ -453,7 +453,7 @@ function updatePreview() {
         return;
     }
     
-    fetch('/admin/preview.php', {
+    fetch('<?= Config::BASE_URL() ?>/admin/preview.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'markdown=' + encodeURIComponent(markdown)

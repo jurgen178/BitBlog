@@ -991,7 +991,7 @@ function updatePreview() {
     return;
   }
   
-  fetch('/admin/preview.php', {
+  fetch('<?= Config::BASE_URL() ?>/admin/preview.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `markdown=${encodeURIComponent(markdown)}`
@@ -1001,6 +1001,10 @@ function updatePreview() {
     previewContent.innerHTML = data.success ? data.html : '<em>' + TRANSLATIONS.error + '</em>';
     // Setup preview scroll sync after content update
     setupPreviewScrollSync();
+  })
+  .catch(err => {
+    console.error('Preview fetch error:', err);
+    previewContent.innerHTML = '<em>' + TRANSLATIONS.error + ': ' + err.message + '</em>';
   });
 }
 
