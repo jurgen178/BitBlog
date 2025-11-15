@@ -3,7 +3,7 @@
 **A lightweight, file-based blog system written in PHP with built-in admin interface.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-blue)](https://www.php.net/)
+[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blue)](https://www.php.net/)
 
 ## ✨ Features
 
@@ -37,7 +37,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- PHP 7.4 or higher (tested with PHP 8.4)
+- PHP 8.0 or higher (tested with PHP 8.4)
 - Web server with PHP support (Apache, Nginx, or PHP built-in server)
 
 ### Installation
