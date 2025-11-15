@@ -18,6 +18,14 @@
 - 🗺️ **Sitemap**: SEO-friendly XML sitemap
 - 🔐 **Private Posts**: Share drafts via secure token URLs
 
+<img width="2496" height="1488" alt="blog" src="https://github.com/user-attachments/assets/cf458ad6-90e1-4c07-a8c1-26185739e2d2" />  
+
+<img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/9cc7a2f7-b693-46b5-a744-fb47f522010f" />  
+
+<img width="2496" height="1485" alt="index3" src="https://github.com/user-attachments/assets/c87f74d0-f949-430d-a259-3fd419a19717" />  
+
+<img width="2496" height="1483" alt="index2" src="https://github.com/user-attachments/assets/2f8984e9-d778-4eeb-a544-780276de6fb5" />
+
 ## 🚀 Quick Start
 
 ### Prerequisites
