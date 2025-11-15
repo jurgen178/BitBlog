@@ -1,4 +1,4 @@
-# BitBlog - Simple PHP Blog System
+# BitBlog - Lightweight PHP Blog System
 
 **A lightweight, file-based blog system written in PHP with built-in admin interface.**
 
