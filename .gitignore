@@ -29,3 +29,4 @@ desktop.ini
 # generate_password.php
 # clean_markdown.php
 # *.ps1
+/.vs
