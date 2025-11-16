@@ -141,6 +141,7 @@ switch ($route['name']) {
             'posts' => $posts,
             'page' => $page,
             'totalPages' => $totalPages,
+            'tag' => $tag,
             'tags' => $content->getTagCloud(),
             'newerTooltip' => $newerTooltip,
             'olderTooltip' => $olderTooltip,
