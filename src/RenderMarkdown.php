@@ -50,12 +50,14 @@ final class RenderMarkdown
             '&equals;', '&colon;', '&semi;', '&percnt;', '&comma;', '&period;',
             '&lpar;', '&rpar;', '&lowbar;', '&NewLine;', '&Tab;', '&excl;',
             '&quest;', '&num;', '&dollar;', '&sol;', '&bsol;', '&ast;',
-            '&plus;', '&Hat;', '&grave;', '&vert;', '&tilde;'
+            '&plus;', '&Hat;', '&grave;', '&vert;', '&tilde;', '&lbrace;', '&rbrace;',
+            '&lcub;', '&rcub;', '&lbrack;', '&rbrack;', '&lsqb;', '&rsqb;'
         ], [
             '=', ':', ';', '%', ',', '.',
             '(', ')', '_', "\n", "\t", '!',
             '?', '#', '$', '/', '\\', '*',
-            '+', '^', '`', '|', '~'
+            '+', '^', '`', '|', '~', '{', '}',
+            '{', '}', '[', ']', '[', ']'
         ], $html);
     }
 }
