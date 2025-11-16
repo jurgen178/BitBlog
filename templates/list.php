@@ -30,7 +30,6 @@ $title = $title ?? Language::getText('home');
         <br />
         <div class="content">
           <?= $p['html'] ?? '' ?>
-          <br />
         </div>
       </li>
 <?php endforeach; ?>

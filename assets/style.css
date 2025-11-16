@@ -67,6 +67,11 @@ a:hover {
   border-bottom: 1px solid var(--border);
 }
 
+/* Ensure consistent spacing after posts, regardless of last element type (text, image, etc.) */
+.post-item .content > *:last-child {
+  margin-bottom: 2.5rem;
+}
+
 .meta {
   color: var(--muted);
   font-size: 0.9em;
