@@ -69,10 +69,11 @@
 
 3. **Start the development server (local testing):**
    ```bash
+   cd bitblog
    php -S localhost:8000
    ```
 
-4. **Access your blog:**
+5. **Access your blog:**
    - Homepage: http://localhost:8000
    - Admin Panel: http://localhost:8000/admin.php
 
