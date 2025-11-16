@@ -60,10 +60,10 @@ foreach ($Datei in $MarkdownDateien) {
         $trefferInDatei = 0
         $neuerBody = $body
         
-        $matches = [regex]::Matches($body, $SuchMuster, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        $regexMatches = [regex]::Matches($body, $SuchMuster, [System.Text.RegularExpressions.RegexOptions]::Singleline)
         
-        if ($matches.Count -gt 0) {
-            $trefferInDatei = $matches.Count
+        if ($regexMatches.Count -gt 0) {
+            $trefferInDatei = $regexMatches.Count
             $gesamtTreffer += $matches.Count
             $dateienMitTreffern++
             
