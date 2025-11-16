@@ -33,31 +33,42 @@ final class RenderMarkdown
      * PROBLEM: ParsedownExtra converts HTML like <div style="color:red;"> into
      *          <div style&equals;&quot;color&colon;red&semi;&quot;> even with safe mode off
      * 
-     * SOLUTION: Comprehensive entity decoding that handles both standard HTML entities
-     *           and ParsedownExtra's custom entities (&equals;, &colon;, etc.)
+     * SOLUTION: Decode entities outside of code blocks to preserve HTML while
+     *           keeping code examples safe
      * 
      * @param string $html HTML with potentially escaped entities
      * @return string Clean HTML with properly decoded entities
      */
     private static function decodeAllHtmlEntities(string $html): string
     {
-        // First pass: Decode standard HTML entities (&lt;, &gt;, &amp;, &quot;, etc.)
-        $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Split HTML into parts: code blocks and everything else
+        // Pattern matches <pre><code>...</code></pre> blocks
+        $parts = preg_split('/(<pre[^>]*>.*?<\/pre>)/s', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
         
-        // Second pass: Decode ParsedownExtra's custom entities that aren't standard HTML
-        // These are used internally by Parsedown for special characters in attributes
-        return str_replace([
-            '&equals;', '&colon;', '&semi;', '&percnt;', '&comma;', '&period;',
-            '&lpar;', '&rpar;', '&lowbar;', '&NewLine;', '&Tab;', '&excl;',
-            '&quest;', '&num;', '&dollar;', '&sol;', '&bsol;', '&ast;',
-            '&plus;', '&Hat;', '&grave;', '&vert;', '&tilde;', '&lbrace;', '&rbrace;',
-            '&lcub;', '&rcub;', '&lbrack;', '&rbrack;', '&lsqb;', '&rsqb;'
-        ], [
-            '=', ':', ';', '%', ',', '.',
-            '(', ')', '_', "\n", "\t", '!',
-            '?', '#', '$', '/', '\\', '*',
-            '+', '^', '`', '|', '~', '{', '}',
-            '{', '}', '[', ']', '[', ']'
-        ], $html);
+        $result = '';
+        foreach ($parts as $i => $part) {
+            // Even indices are outside code blocks, odd indices are code blocks
+            if ($i % 2 === 0) {
+                // Decode entities outside code blocks
+                $part = html_entity_decode($part, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $part = str_replace([
+                    '&equals;', '&colon;', '&semi;', '&percnt;', '&comma;', '&period;',
+                    '&lpar;', '&rpar;', '&lowbar;', '&NewLine;', '&Tab;', '&excl;',
+                    '&quest;', '&num;', '&dollar;', '&sol;', '&bsol;', '&ast;',
+                    '&plus;', '&Hat;', '&grave;', '&vert;', '&tilde;', '&lbrace;', '&rbrace;',
+                    '&lcub;', '&rcub;', '&lbrack;', '&rbrack;', '&lsqb;', '&rsqb;'
+                ], [
+                    '=', ':', ';', '%', ',', '.',
+                    '(', ')', '_', "\n", "\t", '!',
+                    '?', '#', '$', '/', '\\', '*',
+                    '+', '^', '`', '|', '~', '{', '}',
+                    '{', '}', '[', ']', '[', ']'
+                ], $part);
+            }
+            // Code blocks remain untouched
+            $result .= $part;
+        }
+        
+        return $result;
     }
 }
