@@ -123,7 +123,6 @@ switch ($action) {
   <strong>📊 <?= Language::getText('admin_panel') ?></strong>
   <nav>
     <a href="admin.php?action=editor">📝 <?= Language::getText('new_post') ?></a>
-    <a href="admin.php?action=signature">📄 <?= Language::getText('signature_editor') ?></a>
     <a href="admin.php?action=settings">⚙️ <?= Language::getText('settings') ?></a>
     <a href="admin.php?action=rebuild">🔄 <?= Language::getText('rebuild_index') ?></a>
     <a href="admin.php?action=logout">🚪 <?= Language::getText('logout') ?></a>
