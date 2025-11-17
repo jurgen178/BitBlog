@@ -20,22 +20,29 @@
 
 <br />
 <br />
+<br />
 <img width="2496" height="1488" alt="blog" src="https://github.com/user-attachments/assets/cf458ad6-90e1-4c07-a8c1-26185739e2d2" />  
 <br />
 <br />
-<img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/9cc7a2f7-b693-46b5-a744-fb47f522010f" />  
+<br />
+<img width="2496" height="1500" alt="admin" src="https://github.com/user-attachments/assets/1f8e35ec-bb62-4618-8762-659fcc0179ee" />
+<br />
 <br />
 <br />
 <img width="2496" height="1490" alt="editor" src="https://github.com/user-attachments/assets/0f0633fb-53ea-42f1-8665-4c478cbe7931" />  
 <br />
 <br />
+<br />
 <img width="2496" height="1485" alt="signature-editor" src="https://github.com/user-attachments/assets/cff633e3-8520-4442-bea7-47fa445d17d0" />  
+<br />
 <br />
 <br />
 <img width="2496" height="1486" alt="settings" src="https://github.com/user-attachments/assets/965293ac-2dc3-472e-8624-023963d76905" />  
 <br />
 <br />
+<br />
 <img width="2496" height="1485" alt="index3" src="https://github.com/user-attachments/assets/c87f74d0-f949-430d-a259-3fd419a19717" />  
+<br />
 <br />
 <br />
 <img width="2496" height="1483" alt="index2" src="https://github.com/user-attachments/assets/2f8984e9-d778-4eeb-a544-780276de6fb5" />
