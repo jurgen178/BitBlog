@@ -97,7 +97,7 @@ if (empty($_SESSION[Constants::SESSION_CSRF])) {
 <link rel="stylesheet" href="<?= Config::BASE_URL() ?>/admin/admin.css">
 
 <!-- Monaco Editor -->
-<script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script src="https://unpkg.com/monaco-editor@0.54.0/min/vs/loader.js"></script>
 <style>
   /* Editor Layout - Split-screen with preview like the main editor */
   #signature-editor-container {
@@ -348,7 +348,7 @@ const TRANSLATIONS = {
   error: '<?= Language::getText('error') ?>'
 };
 
-require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.44.0/min/vs' }});
+require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.54.0/min/vs' }});
 require(['vs/editor/editor.main'], function () {
     let editor;
     

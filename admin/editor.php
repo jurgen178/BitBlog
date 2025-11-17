@@ -258,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= $mode === 'new' ? Language::getText('new_post') : Language::getText('edit_post') ?></title>
 <link rel="stylesheet" href="<?= Config::BASE_URL() ?>/admin/admin.css">
-<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.54.0/min/vs/loader.js"></script>
+<script src="https://unpkg.com/monaco-editor@0.54.0/min/vs/loader.js"></script>
 <style>
 /* ==========================================================================
    BASE STYLES - Match blog typography
@@ -912,7 +912,7 @@ let scrollSyncEnabled = true;
    ========================================================================== */
 
 require.config({ 
-  paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.54.0/min/vs' }
+  paths: { 'vs': 'https://unpkg.com/monaco-editor@0.54.0/min/vs' }
 });
 
 require(['vs/editor/editor.main'], function() {
