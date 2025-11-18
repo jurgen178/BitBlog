@@ -2,9 +2,17 @@
 # Führt Suchen/Ersetzen-Operationen in Markdown-Dateien durch
 # Überspringt YAML Front Matter Header (zwischen --- Begrenzungen)
 
-[string]$suchDir = "D:\blog\cPicture\index2-downloads\posts-md"
-[string]$SuchMuster = "content/public/upload/"
-[string]$ErsetzenMit = "dateien/"
+[string]$suchDir = "D:\blog\index2-downloads\posts"
+[string]$ausgabeDir = "D:\blog\index2-downloads\out"
+
+[string]$SuchMuster = "ISO(\d)"
+[string]$ErsetzenMit = "ISO `$1"
+
+# Ausgabeverzeichnis erstellen, falls nicht vorhanden
+if (-not (Test-Path $ausgabeDir)) {
+    New-Item -Path $ausgabeDir -ItemType Directory -Force | Out-Null
+    Write-Host "Ausgabeverzeichnis erstellt: $ausgabeDir" -ForegroundColor Green
+}
 
 # Alle Markdown-Dateien laden
 $MarkdownDateien = Get-ChildItem -Path $suchDir -Filter "*.md" -File
@@ -54,15 +62,16 @@ foreach ($Datei in $MarkdownDateien) {
             }
         }
         
-        # Statistiken für diese Datei anzeigen
+        # Statistiken für diese Datei anzeigen und nur geänderte Dateien speichern
         if ($trefferInDatei -gt 0) {
             $dateienMitTreffern++
             Write-Host "  $trefferInDatei Treffer in dieser Datei gefunden" -ForegroundColor Cyan
+            
+            # Nur geänderte Dateien in Ausgabeverzeichnis schreiben
+            $ausgabeDatei = Join-Path $ausgabeDir $Datei.Name
+            [System.IO.File]::WriteAllLines($ausgabeDatei, $inhalt, [System.Text.UTF8Encoding]::new($false))
+            Write-Host "  Datei gespeichert: $ausgabeDatei" -ForegroundColor Green
         }
-        
-        # Zurück in Datei schreiben
-        #[System.IO.File]::WriteAllLines($Datei.FullName, $inhalt, [System.Text.UTF8Encoding]::new($false))
-        Write-Host "  Datei erfolgreich aktualisiert" -ForegroundColor Green
         
     } catch {
         Write-Error "Fehler bei der Verarbeitung der Datei $($Datei.Name): $($_.Exception.Message)"
