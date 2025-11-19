@@ -140,6 +140,9 @@ switch ($action) {
       if ($postCount > 0) {
         echo "<br>📄 " . Language::getTextf('posts_found', $postCount);
       }
+      if (file_exists(__DIR__ . '/blog-content.zip')) {
+        echo "<br>📦 <a href='blog-content.zip' download>" . Language::getText('download_blog_archive') . "</a>";
+      }
 ?>
   </p>
 <?php endif; ?>
