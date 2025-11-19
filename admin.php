@@ -136,12 +136,12 @@ switch ($action) {
     <?= Language::getText('admin_overview_created') ?> <a href="index2a.html" target="_blank">→ <?= Language::getText('view') ?></a><br>
     <?= Language::getText('chronological_created') ?> <a href="index3.html" target="_blank">→ <?= Language::getText('view') ?></a><br>
     <?= Language::getText('chronological_admin_created') ?> <a href="index3a.html" target="_blank">→ <?= Language::getText('view') ?></a><?php
+      if (file_exists(__DIR__ . '/blog-content.zip')) {
+        echo "<br>📦 <a href='blog-content.zip' download>" . Language::getText('download_blog_archive') . "</a>";
+      }
       $postCount = (int)($_GET['post_count'] ?? 0);
       if ($postCount > 0) {
         echo "<br>📄 " . Language::getTextf('posts_found', $postCount);
-      }
-      if (file_exists(__DIR__ . '/blog-content.zip')) {
-        echo "<br>📦 <a href='blog-content.zip' download>" . Language::getText('download_blog_archive') . "</a>";
       }
 ?>
   </p>
