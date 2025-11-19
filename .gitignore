@@ -6,6 +6,9 @@ dateien/
 # Cache files
 cache/
 
+# Backup files
+blog-content.zip
+
 # Build/temporary files
 *.tmp
 *.log
