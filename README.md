@@ -264,8 +264,38 @@ Content goes here in **Markdown** format.
 - **📝 Editor**: Write posts in Markdown with live preview powered by Visual Studio Code
 - **📊 Dashboard**: Overview of all posts with status
 - **🔄 Index Rebuild**: Regenerate cache after bulk changes
+- **📦 Backup & Restore**: Download complete blog archive (all posts and pages as ZIP)
+- **📤 Upload Archive**: Restore blog from backup or migrate content from another BitBlog instance
 - **🗑️ Delete Posts**: Remove posts with confirmation
 - **👀 Preview**: View posts before publishing
+
+### Backup & Migration
+
+BitBlog includes a built-in backup and restore system:
+
+1. **Download backup:**
+   - Navigate to Admin Panel → "🔄 Rebuild Index"
+   - After rebuild, click "📦 Download Blog-Archiv"
+   - Saves a ZIP file containing all posts and pages from the `content/` directory
+
+2. **Restore from backup:**
+   - Navigate to Admin Panel → Click "📤 Upload Archive"
+   - Select a previously downloaded ZIP file
+   - Current content is automatically backed up to `content-backup-YYYY-MM-DD_HHmmss/`
+   - Archive is validated and extracted
+   - Index is automatically rebuilt
+
+3. **Migration between instances:**
+   - Download archive from source blog
+   - Upload to target blog
+   - Perfect for moving between development and production, or cloning a blog
+
+**Security features:**
+- Maximum file size: 5 MB (sufficient for text-based content)
+- Validates ZIP structure (must contain `posts/` and `pages/` folders)
+- Only allows Markdown files (`.md`, `.markdown`)
+- Prevents path traversal attacks
+- Automatic rollback on errors
 
 ## 📱 Responsive Design
 
