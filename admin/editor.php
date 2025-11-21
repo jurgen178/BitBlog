@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token = Utils::generateSecureToken();
         }
 
-        if ($title === '') { $title = Constants::DEFAULT_POST_TITLE; }
+        if ($title === '') { $title = Language::getText('default_post_title'); }
         
         // Create YAML - always quote title to handle special characters (escape order: \ first, then ")
         $yaml = "---\n".

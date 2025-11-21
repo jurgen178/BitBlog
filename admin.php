@@ -91,6 +91,64 @@ switch ($action) {
         include __DIR__ . '/admin/signature.php';
         break;
         
+    case 'upload':
+        require_login();
+        include __DIR__ . '/admin/upload.php';
+        break;
+        
+    case 'archive':
+        require_login();
+        include __DIR__ . '/admin/archive.php';
+        break;
+        
+    case 'restore':
+        require_login();
+        include __DIR__ . '/admin/restore.php';
+        break;
+        
+    case 'delete_backup':
+        require_login();
+        check_csrf();
+        
+        $backupFileName = $_POST['backup_file'] ?? '';
+        if (empty($backupFileName)) {
+            header('Location: admin.php?action=archive&error=no_file_uploaded');
+            exit;
+        }
+        
+        // Security: Prevent path traversal
+        if (strpos($backupFileName, '..') !== false || strpos($backupFileName, '/') !== false || strpos($backupFileName, '\\') !== false) {
+            header('Location: admin.php?action=archive&error=invalid_zip_structure');
+            exit;
+        }
+        
+        // Delete backup file
+        $backupFile = __DIR__ . '/archive/' . $backupFileName;
+        if (file_exists($backupFile) && is_file($backupFile)) {
+            @unlink($backupFile);
+            header('Location: admin.php?action=archive&deleted=1');
+        } else {
+            header('Location: admin.php?action=archive&error=backup_file_not_found');
+        }
+        exit;
+        
+    case 'create_archive':
+        require_login();
+        
+        // Create ZIP archive of content folder
+        $archiveDir = __DIR__ . '/archive';
+        if (!file_exists($archiveDir)) {
+            mkdir($archiveDir, 0755, true);
+        }
+        
+        $timestamp = date('Y-m-d_His');
+        $zipFile = $archiveDir . '/blog-content-' . $timestamp . '.zip';
+        
+        Utils::createZipArchive(Config::CONTENT_DIR, $zipFile);
+        
+        header('Location: admin.php?action=archive&created=1');
+        exit;
+        
     case 'dashboard':
     default:
         // DASHBOARD - Only this is integrated into admin.php
@@ -123,6 +181,7 @@ switch ($action) {
   <strong>📊 <?= Language::getText('admin_panel') ?></strong>
   <nav>
     <a href="admin.php?action=editor">📝 <?= Language::getText('new_post') ?></a>
+    <a href="admin.php?action=archive">📦 <?= Language::getText('archive') ?></a>
     <a href="admin.php?action=settings">⚙️ <?= Language::getText('settings') ?></a>
     <a href="admin.php?action=rebuild">🔄 <?= Language::getText('rebuild_index') ?></a>
     <a href="admin.php?action=logout">🚪 <?= Language::getText('logout') ?></a>
@@ -136,14 +195,26 @@ switch ($action) {
     <?= Language::getText('admin_overview_created') ?> <a href="index2a.html" target="_blank">→ <?= Language::getText('view') ?></a><br>
     <?= Language::getText('chronological_created') ?> <a href="index3.html" target="_blank">→ <?= Language::getText('view') ?></a><br>
     <?= Language::getText('chronological_admin_created') ?> <a href="index3a.html" target="_blank">→ <?= Language::getText('view') ?></a><?php
-      if (file_exists(__DIR__ . '/blog-content.zip')) {
-        echo "<br>📦 <a href='blog-content.zip' download>" . Language::getText('download_blog_archive') . "</a>";
-      }
       $postCount = (int)($_GET['post_count'] ?? 0);
       if ($postCount > 0) {
         echo "<br>📄 " . Language::getTextf('posts_found', $postCount);
       }
+      if (file_exists(__DIR__ . '/blog-content.zip')) {
+        echo "<br>📦 <a href='admin.php?action=archive'>" . Language::getText('view_archive_page') . "</a>";
+      }
 ?>
+  </p>
+<?php endif; ?>
+
+<?php if (!empty($_GET['uploaded'])): ?>
+  <p class="notice success">
+    ✅ <?= Language::getText('upload_success') ?><br>
+    <?php if (!empty($_GET['backup'])): ?>
+      <?= Language::getTextf('backup_created', htmlspecialchars($_GET['backup'])) ?>
+    <?php endif; ?>
+    <?php if (!empty($_GET['warning'])): ?>
+      <br>⚠️ <?= Language::getText($_GET['warning']) ?>
+    <?php endif; ?>
   </p>
 <?php endif; ?>
 
@@ -155,18 +226,42 @@ switch ($action) {
 <?php if (!empty($_GET['error'])): ?>
   <p class="notice error">
     ❌ <?= Language::getText('error') ?>: <?php
-      switch($_GET['error']) {
+      $errorKey = $_GET['error'];
+      switch($errorKey) {
         case 'invalid_id': echo Language::getText('invalid_id'); break;
         case 'post_not_found': echo Language::getText('post_not_found'); break;
         case 'delete_failed': echo Language::getText('delete_failed'); break;
         case 'file_not_found': echo Language::getText('file_not_found'); break;
         case 'invalid_parameters': echo Language::getText('invalid_parameters'); break;
-        default: echo Language::getText('unknown_error');
+        
+        // Upload errors
+        case 'method_not_allowed': echo Language::getText('method_not_allowed'); break;
+        case 'upload_failed': echo Language::getText('upload_failed'); break;
+        case 'upload_too_large': echo Language::getText('upload_too_large'); break;
+        case 'no_file_uploaded': echo Language::getText('no_file_uploaded'); break;
+        case 'invalid_file_type': echo Language::getText('invalid_file_type'); break;
+        case 'invalid_zip': echo Language::getText('invalid_zip'); break;
+        case 'invalid_zip_structure': echo Language::getText('invalid_zip_structure'); break;
+        case 'missing_required_dirs': echo Language::getText('missing_required_dirs'); break;
+        case 'invalid_files_in_zip': echo Language::getText('invalid_files_in_zip'); break;
+        case 'content_dir_not_found': echo Language::getText('content_dir_not_found'); break;
+        case 'content_not_readable': echo Language::getText('content_not_readable'); break;
+        case 'parent_not_writable': echo Language::getText('parent_not_writable'); break;
+        case 'backup_failed': echo Language::getText('backup_failed'); break;
+        case 'backup_exists': echo Language::getText('backup_exists'); break;
+        case 'delete_old_failed': echo Language::getText('delete_old_failed'); break;
+        case 'mkdir_failed': echo Language::getText('mkdir_failed'); break;
+        case 'extract_failed': echo Language::getText('extract_failed'); break;
+        case 'extract_exception': echo Language::getText('extract_exception'); break;
+        
+        default: 
+          echo Language::getText('archive_unusable') . ' (' . htmlspecialchars($errorKey) . ')';
       }
 ?>
   </p>
 <?php endif; ?>
   <h2><?= Language::getText('posts') ?></h2>
+  
   <div class="settings-filter">
     <label><?= Language::getText('status') ?>: </label>
     <select onchange="window.location.href='admin.php?status='+this.value" class="filter-select">

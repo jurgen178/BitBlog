@@ -18,30 +18,15 @@ $content->generateOverviewPage($posts);
 $content->generateOverviewPage($posts, 'edit');
 
 // Create ZIP archive of content folder
-$zipFile = __DIR__ . '/../blog-content.zip';
-if (file_exists($zipFile)) {
-    unlink($zipFile);
+$archiveDir = __DIR__ . '/../archive';
+if (!file_exists($archiveDir)) {
+    mkdir($archiveDir, 0755, true);
 }
 
-$zip = new ZipArchive();
-if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-    $contentPath = realpath(Config::CONTENT_DIR);
-    
-    $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($contentPath, RecursiveDirectoryIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::LEAVES_ONLY
-    );
-    
-    foreach ($files as $file) {
-        if (!$file->isDir()) {
-            $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen($contentPath) + 1);
-            $zip->addFile($filePath, $relativePath);
-        }
-    }
-    
-    $zip->close();
-}
+$timestamp = date('Y-m-d_His'); // Format: Year-Month-Day_HourMinuteSecond
+$zipFile = $archiveDir . '/blog-content-' . $timestamp . '.zip';
+
+Utils::createZipArchive(Config::CONTENT_DIR, $zipFile);
 
 // Redirect back to admin dashboard with success message and post count
 header('Location: admin.php?rebuilt=1&post_count=' . $postCount);

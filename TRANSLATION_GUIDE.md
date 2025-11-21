@@ -125,7 +125,6 @@ Create `src/lang/fr.json`:
     "delete_failed": "Échec de la suppression",
     "file_not_found": "Fichier non trouvé",
     "unknown_error": "Erreur inconnue",
-    "confirm_delete": "Vraiment supprimer l'article '%s' ?",
     "status_published": "Publié",
     "status_draft": "Brouillon",
     
