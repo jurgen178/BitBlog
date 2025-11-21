@@ -21,7 +21,7 @@
 <br />
 <br />
 <br />
-<img width="2496" height="1488" alt="blog" src="https://github.com/user-attachments/assets/cf458ad6-90e1-4c07-a8c1-26185739e2d2" />  
+<img width="2496" height="1489" alt="blog" src="https://github.com/user-attachments/assets/40cb1a14-9fe0-4ddb-84b6-e155cb02ca09" />
 <br />
 <br />
 <img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/39164e53-7c67-4c27-b986-b50fbdedd883" />
