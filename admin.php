@@ -1,8 +1,30 @@
 <?php
 declare(strict_types=1);
 
-// Start session
+// HTTPS Enforcement (Production only - comment out for local development)
+// Uncomment the following lines for production:
+// if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+//     header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+//     exit;
+// }
+
+// Content Security Policy
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: DENY");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+
+// Start session with secure settings
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
     session_start();
 }
 
@@ -233,6 +255,7 @@ switch ($action) {
         case 'delete_failed': echo Language::getText('delete_failed'); break;
         case 'file_not_found': echo Language::getText('file_not_found'); break;
         case 'invalid_parameters': echo Language::getText('invalid_parameters'); break;
+        case 'invalid_date': echo Language::getText('invalid_date'); break;
         
         // Upload errors
         case 'method_not_allowed': echo Language::getText('method_not_allowed'); break;

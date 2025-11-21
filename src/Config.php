@@ -6,20 +6,22 @@ namespace BitBlog;
 final class Config
 {
     // Default values (fallbacks)
-    public const SITE_TITLE = 'My Blog';
+    public const SITE_TITLE = 'Borbin the 🐱';
     public const CONTENT_DIR = __DIR__ . '/../content';
     public const CACHE_DIR = __DIR__ . '/../cache';
     public const POSTS_PER_PAGE = 5;
     public const RSS_POSTS_LIMIT = 100; // 0 = alle Posts
     public const TIMEZONE = 'UTC';
     public const DEFAULT_LANGUAGE = 'de';
-    public const SITE_URL = 'https://mysite.com/blog'; // Production URL fallback
+    public const SITE_URL = 'https://bitfabrik.io/blog2'; // Production URL fallback
 
     // Security (not configurable via admin)
+    public const ADMIN_USER = 'jurgen';
+    public const ADMIN_PASSWORD_HASH = '$2y$12$4GV2TU2b76DAz1RqjFupkukEplnIYCCsZ5YYc78X0jTCcIJlglpf6';
     // ⚠️ IMPORTANT: Set your admin credentials here
     // Use setup mode (login.php) to create a secure hash
-    public const ADMIN_USER = '';
-    public const ADMIN_PASSWORD_HASH = '';
+    //public const ADMIN_USER = '';
+    //public const ADMIN_PASSWORD_HASH = '';
 
     // Runtime cache
     private static ?string $baseUrlCache = null;

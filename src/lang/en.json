@@ -151,6 +151,7 @@
     "invalid_security_token": "Invalid security token",
     "invalid_parameters": "Invalid URL parameters used",
     "invalid_post_id": "Invalid post ID",
+    "invalid_date": "Invalid date format",
     
     "settings": "Settings",
     "dashboard": "Dashboard",
@@ -159,6 +160,9 @@
     "save_settings": "Save Settings",
     
     "built_with": "Built with BitBlog",
+    
+    "search_placeholder": "Search...",
+    "no_search_results": "No results found",
     
     "general_settings": "General Settings",
     "display_settings": "Display Settings",

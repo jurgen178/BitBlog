@@ -3,19 +3,16 @@ require_login();
 
 use BitBlog\Content;
 use BitBlog\Config;
+use BitBlog\Utils;
 
 $content = new Content(Config::CONTENT_DIR, Config::CACHE_DIR, Config::BASE_URL());
 
-// Rebuild index
-$content->rebuildIndex();
+// Rebuild index and generate all pages
+$content->rebuildAll();
 
 // Get count of posts after rebuild
 $posts = $content->getIndex();
 $postCount = count($posts);
-
-// Generate overview pages
-$content->generateOverviewPage($posts);
-$content->generateOverviewPage($posts, 'edit');
 
 // Create ZIP archive of content folder
 $archiveDir = __DIR__ . '/../archive';

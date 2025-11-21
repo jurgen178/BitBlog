@@ -45,15 +45,16 @@ final class IndexManager
             throw new \RuntimeException("Cannot create cache directory: " . $this->cacheDir);
         }
         if (!file_exists($this->indexFile)) {
-            $this->rebuildIndex();
+            $this->rebuildPostIndex();
         }
     }
 
     /**
-     * Rebuild the post index cache
+     * Rebuild the post index cache from markdown files
+     * Scans all posts, extracts metadata, and creates searchable JSON index
      * @return void
      */
-    public function rebuildIndex(): void
+    public function rebuildPostIndex(): void
     {
         $posts = [];
         $rii = new \RecursiveIteratorIterator(
@@ -100,9 +101,55 @@ final class IndexManager
         usort($posts, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
         Utils::writeFile($this->indexFile, json_encode($posts, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         
+        // Build search index
+        $this->buildSearchIndex($posts);
+        
         // PERFORMANCE: Invalidate caches after rebuild
         $this->indexCache = null;
         $this->tagCloudCache = null;
+    }
+
+    /**
+     * Build search index for client-side instant search
+     * Creates a lightweight JSON file with title, content, and tags (all lowercase)
+     * 
+     * @param array $posts Array of post metadata
+     * @return void
+     */
+    private function buildSearchIndex(array $posts): void
+    {
+        $searchIndex = [];
+        
+        foreach ($posts as $post) {
+            // Skip non-published posts in search index
+            if ($post['status'] !== Constants::POST_STATUS_PUBLISHED) {
+                continue;
+            }
+            
+            // Read and strip HTML from content
+            $raw = Utils::readFile($post['path']);
+            $parsed = $this->markdownProcessor->readMarkdownWithMeta($post['path'], $raw);
+            $html = RenderMarkdown::toHtml($parsed['body']);
+            $plainText = strip_tags($html);
+            
+            // Normalize whitespace: replace multiple spaces, newlines, tabs with single space
+            $plainText = preg_replace('/\s+/', ' ', $plainText);
+            $plainText = trim($plainText);
+            
+            // Build search entry with lowercase values for case-insensitive search
+            // Also store original text for proper display in results
+            $searchIndex[$post['id']] = [
+                'title' => mb_strtolower($post['title'], 'UTF-8'),
+                'content' => mb_strtolower($plainText, 'UTF-8'),
+                'original_title' => $post['title'],
+                'original_content' => $plainText,
+                'url' => $post['url'],
+                'date' => $post['timestamp']
+            ];
+        }
+        
+        $searchIndexFile = $this->cacheDir . '/search-index.json';
+        Utils::writeFile($searchIndexFile, json_encode($searchIndex, JSON_UNESCAPED_UNICODE));
     }
 
     /**

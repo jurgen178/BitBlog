@@ -70,10 +70,7 @@ try {
 // Rebuild index after restore
 try {
     $content = new Content(Config::CONTENT_DIR, Config::CACHE_DIR, Config::BASE_URL());
-    $content->rebuildIndex();
-    $posts = $content->getIndex();
-    $content->generateOverviewPage($posts);
-    $content->generateOverviewPage($posts, 'edit');
+    $content->rebuildAll();
 } catch (Exception $e) {
     header('Location: admin.php?action=archive&restored=1&warning=rebuild_failed');
     exit;
