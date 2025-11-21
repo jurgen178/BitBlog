@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 file_put_contents($path, $fileContent);
                 
                 // Rebuild index to update token
-                $content->rebuildIndex();
+                $content->rebuildAll();
                 
                 // Reload post data
                 $editPostId = $post_id;
@@ -121,6 +121,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $body = (string)($_POST['body'] ?? '');
         $original_path = (string)($_POST['original_path'] ?? '');
         $post_id = (int)($_POST['post_id'] ?? 0);
+        
+        // Validate date input
+        if (!empty($date)) {
+            $dateObj = DateTime::createFromFormat('Y-m-d\TH:i', $date);
+            if (!$dateObj || $dateObj->format('Y-m-d\TH:i') !== $date) {
+                // Invalid date format - redirect with error
+                header('Location: admin.php?error=invalid_date');
+                exit;
+            }
+        }
         
         // Load existing token if editing
         $existingToken = null;
@@ -245,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     file_put_contents($dest, $md);
     
     if ($needsIndexRebuild) {
-        $content->rebuildIndex();
+        $content->rebuildAll();
     }
 
     header('Location: admin.php');

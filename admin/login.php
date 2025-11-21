@@ -44,6 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $u = $_POST['user'] ?? '';
             $p = $_POST['pass'] ?? '';
             if ($u === Config::ADMIN_USER && password_verify($p, Config::ADMIN_PASSWORD_HASH)) {
+                // Regenerate session ID to prevent session fixation
+                session_regenerate_id(true);
                 $_SESSION[Constants::SESSION_ADMIN] = true;
                 header('Location: admin.php');
                 exit;

@@ -151,6 +151,7 @@
     "invalid_security_token": "Ungültiger Sicherheits-Token",
     "invalid_parameters": "Ungültige URL-Parameter verwendet",
     "invalid_post_id": "Ungültige Beitrags-ID",
+    "invalid_date": "Ungültiges Datumsformat",
     
     "settings": "Einstellungen",
     "dashboard": "Dashboard",
@@ -159,6 +160,9 @@
     "save_settings": "Einstellungen speichern",
     
     "built_with": "Erstellt mit BitBlog",
+    
+    "search_placeholder": "Suche...",
+    "no_search_results": "Keine Ergebnisse gefunden",
     
     "general_settings": "Allgemeine Einstellungen",
     "display_settings": "Anzeige-Einstellungen", 

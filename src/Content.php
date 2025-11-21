@@ -38,15 +38,21 @@ final class Content
         return $this->pageGenerator ??= new PageGenerator($this->contentDir, $this->cacheDir, $this->baseUrl, $this->getMarkdownProcessor());
     }
 
-    public function rebuildIndex(): void
+    /**
+     * Rebuild all cached data: index, overview pages, and signature
+     * This is the main rebuild operation that coordinates all sub-tasks
+     * @return void
+     */
+    public function rebuildAll(): void
     {
-        $this->getIndexManager()->rebuildIndex();
+        $this->getIndexManager()->rebuildPostIndex();
         
         // Generate overview pages and signature after index rebuild
         $posts = $this->getIndexManager()->getIndex();
-        $this->getPageGenerator()->generateOverviewPage($posts);
-        $this->getPageGenerator()->generateOverviewPage($posts, 'edit');
-        $this->getPageGenerator()->generateSignature($posts);
+        $pageGen = $this->getPageGenerator();
+        $pageGen->generateOverviewPage($posts);
+        $pageGen->generateOverviewPage($posts, 'edit');
+        $pageGen->generateSignature($posts);
         
         // Invalidate tag cloud cache
         $this->tagCloudCache = null;

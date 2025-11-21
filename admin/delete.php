@@ -81,7 +81,7 @@ if (file_exists($post['path'])) {
     if (unlink($post['path'])) {
 
         // Rebuild the index to remove the post from cache
-        $content->rebuildIndex();
+        $content->rebuildAll();
         
         // Redirect back with success message
         header('Location: admin.php?deleted=1');
