@@ -24,6 +24,9 @@
 <img width="2496" height="1489" alt="blog" src="https://github.com/user-attachments/assets/40cb1a14-9fe0-4ddb-84b6-e155cb02ca09" />
 <br />
 <br />
+<img width="2496" height="1486" alt="search" src="https://github.com/user-attachments/assets/20afc2ad-1adc-46a8-8505-691f28315d56" />
+<br />
+<br />
 <img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/39164e53-7c67-4c27-b986-b50fbdedd883" />
 <br />
 <br />
