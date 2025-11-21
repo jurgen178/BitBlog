@@ -24,25 +24,22 @@
 <img width="2496" height="1488" alt="blog" src="https://github.com/user-attachments/assets/cf458ad6-90e1-4c07-a8c1-26185739e2d2" />  
 <br />
 <br />
-<br />
-<img width="2496" height="1482" alt="admin" src="https://github.com/user-attachments/assets/ab3d0b9e-db33-4418-82cb-1b27b21de120" />
-<br />
+<img width="2496" height="1489" alt="admin" src="https://github.com/user-attachments/assets/39164e53-7c67-4c27-b986-b50fbdedd883" />
 <br />
 <br />
 <img width="2496" height="1490" alt="editor" src="https://github.com/user-attachments/assets/0f0633fb-53ea-42f1-8665-4c478cbe7931" />  
 <br />
 <br />
-<br />
 <img width="2496" height="1485" alt="signature-editor" src="https://github.com/user-attachments/assets/cff633e3-8520-4442-bea7-47fa445d17d0" />  
-<br />
 <br />
 <br />
 <img width="2496" height="1486" alt="settings" src="https://github.com/user-attachments/assets/965293ac-2dc3-472e-8624-023963d76905" />  
 <br />
 <br />
+<img width="2496" height="1481" alt="archive" src="https://github.com/user-attachments/assets/842cb42d-857f-4f74-ba36-4095836be9a9" />
+<br />
 <br />
 <img width="2496" height="1485" alt="index3" src="https://github.com/user-attachments/assets/c87f74d0-f949-430d-a259-3fd419a19717" />  
-<br />
 <br />
 <br />
 <img width="2496" height="1483" alt="index2" src="https://github.com/user-attachments/assets/2f8984e9-d778-4eeb-a544-780276de6fb5" />
