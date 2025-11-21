@@ -80,7 +80,6 @@ if (!isset($_GET['confirm']) || $_GET['confirm'] !== '1') {
 if (file_exists($post['path'])) {
     if (unlink($post['path'])) {
 
-        
         // Rebuild the index to remove the post from cache
         $content->rebuildIndex();
         

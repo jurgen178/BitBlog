@@ -102,6 +102,8 @@
    chmod -R 775 .
    chown -R www-data:www-data .
    ```
+   
+   **Note:** The `archive/` directory will be created automatically when you create your first archive.
 
 3. **Configure Apache:**
    - Point document root to the BitBlog directory
@@ -126,6 +128,8 @@
    # Grant write access to entire BitBlog directory
    icacls "C:\inetpub\wwwroot\bitblog" /grant "IIS_IUSRS:(OI)(CI)M" /T
    ```
+   
+   **Note:** The `archive\` directory will be created automatically when you create your first archive.
 
 3. **Configure IIS:**
    - Install PHP using Web Platform Installer or manually
@@ -152,11 +156,13 @@ blog-test/
 ├── admin/                 # Admin interface files
 │   ├── login.php          # Login form
 │   ├── editor.php         # Post editor
+│   ├── archive.php        # Archive management
 │   └── admin.css          # Admin styles
 ├── templates/             # HTML templates
 ├── content/               # Your content
 │   ├── posts/             # Blog posts (.md files)
 │   └── pages/             # Static pages
+├── archive/               # Generated archives and backups
 ├── cache/                 # Generated cache files
 └── assets/                # CSS, images, etc.
 ```
@@ -264,38 +270,49 @@ Content goes here in **Markdown** format.
 - **📝 Editor**: Write posts in Markdown with live preview powered by Visual Studio Code
 - **📊 Dashboard**: Overview of all posts with status
 - **🔄 Index Rebuild**: Regenerate cache after bulk changes
-- **📦 Backup & Restore**: Download complete blog archive (all posts and pages as ZIP)
-- **📤 Upload Archive**: Restore blog from backup or migrate content from another BitBlog instance
+- **📦 Archive Management**: Create, download, restore, and delete blog archives
 - **🗑️ Delete Posts**: Remove posts with confirmation
 - **👀 Preview**: View posts before publishing
 
-### Backup & Migration
+### Archive & Migration
 
-BitBlog includes a built-in backup and restore system:
+BitBlog includes a comprehensive archive management system at `/admin.php?action=archive`:
 
-1. **Download backup:**
-   - Navigate to Admin Panel → "🔄 Rebuild Index"
-   - After rebuild, click "📦 Download Blog-Archiv"
-   - Saves a ZIP file containing all posts and pages from the `content/` directory
+**1. Create Archive:**
+- Click "🔄 Create Archive Now" to create a ZIP archive
+- No index rebuild required - just packages current content
+- Archives are timestamped: `blog-content-YYYY-MM-DD_HHmmss.zip`
+- All archives appear in the Archive History table below
 
-2. **Restore from backup:**
-   - Navigate to Admin Panel → Click "📤 Upload Archive"
-   - Select a previously downloaded ZIP file
-   - Current content is automatically backed up to `content-backup-YYYY-MM-DD_HHmmss/`
-   - Archive is validated and extracted
-   - Index is automatically rebuilt
+**2. Upload Archive:**
+- Drag & drop or select a ZIP file (max 5 MB)
+- Automatic validation (must contain `posts/` and `pages/` folders with Markdown files)
+- Current content is automatically saved as archive before extraction
+- Index is automatically rebuilt after upload
+- Perfect for migration between BitBlog instances
 
-3. **Migration between instances:**
-   - Download archive from source blog
-   - Upload to target blog
-   - Perfect for moving between development and production, or cloning a blog
+**3. Archive History:**
+All archives are managed in one table with three actions per archive:
+- **⬇️ Download**: Download the archive ZIP file
+- **↩️ Restore**: Replace current content with this archive (creates automatic backup first)
+- **🗑️ Delete**: Remove archive from server
 
-**Security features:**
-- Maximum file size: 5 MB (sufficient for text-based content)
-- Validates ZIP structure (must contain `posts/` and `pages/` folders)
-- Only allows Markdown files (`.md`, `.markdown`)
-- Prevents path traversal attacks
-- Automatic rollback on errors
+**Archive Types:**
+- **🔄 Auto Archive** (`archive-*.zip`): Created automatically before upload or restore
+- **📦 Manual Archive** (`blog-content-*.zip`): Created via "Create Archive Now" button
+
+**Security Features:**
+- Maximum file size: 5 MB
+- Validates ZIP structure (prevents path traversal)
+- Only allows Markdown files in `posts/` and `pages/`
+- Automatic backup before any restore operation
+- CSRF protection on all actions
+
+**Migration Workflow:**
+1. Source blog: Create archive
+2. Download the ZIP file
+3. Target blog: Upload archive
+4. Done! All posts and pages migrated
 
 ## 📱 Responsive Design
 

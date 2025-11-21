@@ -102,4 +102,113 @@ final class Utils
     {
         return bin2hex(random_bytes($length));
     }
+
+    /**
+     * Create a ZIP archive from a directory
+     * 
+     * @param string $sourceDir Source directory path
+     * @param string $zipFilePath Destination ZIP file path
+     * @return bool True on success, false on failure
+     */
+    public static function createZipArchive(string $sourceDir, string $zipFilePath): bool
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return false;
+        }
+
+        $contentPath = realpath($sourceDir);
+        if (!$contentPath) {
+            $zip->close();
+            return false;
+        }
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($contentPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($files as $file) {
+            if (!$file->isDir()) {
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($contentPath) + 1);
+                // Normalize path separators to forward slashes for ZIP compatibility
+                $relativePath = str_replace('\\', '/', $relativePath);
+                $zip->addFile($filePath, $relativePath);
+            }
+        }
+
+        $zip->close();
+        return true;
+    }
+
+    /**
+     * Recursively delete a directory and all its contents
+     * 
+     * @param string $dir Directory path to delete
+     * @return void
+     */
+    public static function recursiveDelete(string $dir): void
+    {
+        if (!is_dir($dir)) return;
+        
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        
+        foreach ($items as $item) {
+            if ($item->isDir()) {
+                rmdir($item->getRealPath());
+            } else {
+                unlink($item->getRealPath());
+            }
+        }
+        
+        rmdir($dir);
+    }
+
+    /**
+     * Extract ZIP archive to a directory, replacing existing content
+     * Creates automatic backup before extraction
+     * 
+     * @param string $zipFilePath Path to ZIP file
+     * @param string $targetDir Target directory path
+     * @return bool True on success, false on failure
+     * @throws \RuntimeException On extraction errors
+     */
+    public static function extractZipReplace(string $zipFilePath, string $targetDir): bool
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($zipFilePath) !== true) {
+            return false;
+        }
+
+        $realTargetDir = realpath($targetDir);
+        
+        // Delete old content directory if it exists
+        if ($realTargetDir && is_dir($realTargetDir)) {
+            self::recursiveDelete($realTargetDir);
+        }
+
+        // Create new content directory
+        if (!mkdir($targetDir, 0755, true)) {
+            $zip->close();
+            throw new \RuntimeException("Failed to create directory: $targetDir");
+        }
+
+        // Extract ZIP
+        try {
+            if (!$zip->extractTo($targetDir)) {
+                $zip->close();
+                throw new \RuntimeException("Failed to extract ZIP to: $targetDir");
+            }
+            $zip->close();
+        } catch (\Exception $e) {
+            $zip->close();
+            throw new \RuntimeException("Exception during ZIP extraction: " . $e->getMessage());
+        }
+
+        return true;
+    }
 }

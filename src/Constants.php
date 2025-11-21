@@ -14,7 +14,6 @@ final class Constants
     public const MARKDOWN_EXTENSION = 'md';
     
     // Default values
-    public const DEFAULT_POST_TITLE = 'Untitled';
     public const DEFAULT_POST_STATUS = self::POST_STATUS_DRAFT;
     
     // Cache keys
