@@ -192,6 +192,37 @@ use BitBlog\Language;
     return highlighted;
   }
 })();
+
+// Share post functionality
+function sharePost(button) {
+  const url = button.dataset.url;
+  const title = button.dataset.title;
+  
+  // Try native share API first (works on mobile and some desktop browsers)
+  if (navigator.share) {
+    navigator.share({
+      title: title,
+      url: url
+    }).catch(() => {
+      // User cancelled, do nothing
+    });
+  } else {
+    // Fallback: Copy to clipboard
+    navigator.clipboard.writeText(url).then(() => {
+      // Show temporary success message
+      const originalHTML = button.innerHTML;
+      button.innerHTML = '✓';
+      button.style.color = '#28a745';
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.color = '';
+      }, 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      alert('<?= Language::getText('copy_link') ?>: ' + url);
+    });
+  }
+}
 </script>
 </body>
 </html>
