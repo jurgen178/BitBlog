@@ -372,7 +372,7 @@ final class PageGenerator
                     <th><?= Language::getText('date') ?></th>
                     <th><?= Language::getText('title') ?></th>
                     <th><?= Language::getText('tags') ?></th>
-                    <th style="text-align: right;">⏱️</th>
+                    <th style="text-align: right;"><?= Language::getText('reading_time_label') ?></th>
                 </tr>
             </thead>
             <tbody>
