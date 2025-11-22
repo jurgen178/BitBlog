@@ -79,6 +79,25 @@ final class IndexManager
             $id = $this->markdownProcessor->extractIdFromFilename($filename);
             if ($id === null) continue; // Skip files that don't match the expected format
             
+            // Calculate reading time from content (or use manual override from meta)
+            if (isset($meta['reading_time']) && is_numeric($meta['reading_time'])) {
+                // Manual override from YAML meta
+                $readingTime = max(1, (int)$meta['reading_time']);
+            } else {
+                // Automatic calculation: remove HTML tags completely, then count words
+                $html = RenderMarkdown::toHtml($post['body']);
+                // Remove all HTML tags and their content (not just strip tags)
+                $textOnly = preg_replace('/<[^>]*>/', ' ', $html);
+                // Decode HTML entities
+                $textOnly = html_entity_decode($textOnly, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                // Normalize whitespace
+                $textOnly = preg_replace('/\s+/', ' ', $textOnly);
+                $textOnly = trim($textOnly);
+                // Count words
+                $wordCount = str_word_count($textOnly);
+                $readingTime = max(1, (int)ceil($wordCount / 200)); // 200 words per minute
+            }
+            
             $url = $this->baseUrl . '/index.php?id=' . $id;
 
             $postData = [
@@ -89,6 +108,7 @@ final class IndexManager
                 'tags' => $tags,
                 'path' => $path,
                 'url' => $url,
+                'reading_time' => $readingTime,
             ];
             
             // Only include token if it exists (for private posts)

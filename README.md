@@ -17,6 +17,8 @@
 - 📡 **RSS Feed**: Automatic RSS generation
 - 🗺️ **Sitemap**: SEO-friendly XML sitemap
 - 🔐 **Private Posts**: Share drafts via secure token URLs
+- ⏱️ **Reading Time**: Automatic calculation with manual override option
+- 🔗 **Share Button**: Native Web Share API with clipboard fallback
 
 <br />
 <br />
@@ -254,6 +256,7 @@ Posts are Markdown files with YAML front matter stored in `content/posts/`:
 title: My Blog Post
 status: published
 tags: [php, blog, web]
+reading_time: 5  # Optional: Manual override (in minutes). Omit for auto-calculation.
 ---
 
 # My Blog Post

@@ -372,6 +372,7 @@ final class PageGenerator
                     <th><?= Language::getText('date') ?></th>
                     <th><?= Language::getText('title') ?></th>
                     <th><?= Language::getText('tags') ?></th>
+                    <th style="text-align: right;">⏱️</th>
                 </tr>
             </thead>
             <tbody>
@@ -396,6 +397,11 @@ final class PageGenerator
 <?php endforeach; ?>
 <?php endif; ?>
 </td>
+                    <td class="post-reading-time" style="text-align: right; white-space: nowrap; color: #666; font-size: 0.7rem;">
+                        <?php if (isset($post['reading_time'])): ?>
+                            <?= Language::getTextf('reading_time', $post['reading_time']) ?>
+                        <?php endif; ?>
+                    </td>
                 </tr>
 <?php endforeach; ?>
             </tbody>
