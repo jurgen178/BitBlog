@@ -160,13 +160,12 @@ blog-test/
 │   ├── editor.php         # Post editor
 │   ├── archive.php        # Archive management
 │   └── admin.css          # Admin styles
-├── templates/             # HTML templates
+├── templates/             # HTML templates and CSS
 ├── content/               # Your content
 │   ├── posts/             # Blog posts (.md files)
 │   └── pages/             # Static pages
 ├── archive/               # Generated archives and backups
-├── cache/                 # Generated cache files
-└── assets/                # CSS, images, etc.
+└── cache/                 # Generated cache files
 ```
 
 ## 📝 URL Structure
@@ -347,7 +346,7 @@ All archives are managed in one table with three actions per archive:
 ## 🎨 Customization
 
 - Edit templates in `/templates/` for layout changes
-- Modify CSS in `/assets/style.css` for styling
+- Modify CSS in `/templates/style.css` for styling
 - Admin interface styles in `/admin/admin.css`
 
 ## 🤝 Contributing

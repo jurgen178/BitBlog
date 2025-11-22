@@ -254,6 +254,129 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Search Component Styles */
+.search-container { 
+  position: relative; 
+  margin: 1rem 0; 
+  max-width: 400px; 
+}
+
+.search-toggle { 
+  cursor: pointer; 
+  color: #4a90e2; 
+  font-size: 1rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  user-select: none; 
+}
+
+.search-toggle:hover { 
+  color: #357abd; 
+}
+
+.search-input-wrapper { 
+  max-height: 0; 
+  overflow: hidden; 
+  transition: max-height 0.3s ease; 
+}
+
+.search-input-wrapper.expanded { 
+  max-height: 500px; 
+}
+
+.search-input { 
+  width: 100%; 
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem; 
+  border: 1px solid #ddd; 
+  border-radius: 4px; 
+  font-size: 1rem; 
+  margin-top: 0.5rem; 
+  box-sizing: border-box; 
+}
+
+.search-input:focus { 
+  outline: none; 
+  border-color: #4a90e2; 
+}
+
+.search-icon { 
+  position: absolute; 
+  right: 0.75rem; 
+  top: calc(0.5rem + 0.5rem + 50%); 
+  transform: translateY(-50%); 
+  pointer-events: none; 
+  opacity: 0; 
+  transition: opacity 0.3s; 
+}
+
+.search-input-wrapper.expanded .search-icon { 
+  opacity: 0.5; 
+}
+
+.search-results { 
+  position: absolute; 
+  top: 100%; 
+  left: 0; 
+  right: 0; 
+  background: white; 
+  border: 1px solid #ddd; 
+  border-top: none; 
+  border-radius: 0 0 4px 4px; 
+  max-height: 400px; 
+  overflow-y: auto; 
+  display: none; 
+  z-index: 1000; 
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+}
+
+.search-results.active { 
+  display: block; 
+}
+
+.search-result-item { 
+  display: block; 
+  padding: 0.75rem; 
+  border-bottom: 1px solid #eee; 
+  cursor: pointer; 
+  text-decoration: none; 
+  color: inherit; 
+}
+
+.search-result-item:hover { 
+  background: #f5f5f5; 
+  text-decoration: none; 
+}
+
+.search-result-item:last-child { 
+  border-bottom: none; 
+}
+
+.search-result-title { 
+  font-weight: bold; 
+  margin-bottom: 0.25rem; 
+  color: #0066cc; 
+}
+
+.search-result-item:hover .search-result-title { 
+  text-decoration: underline; 
+}
+
+.search-result-excerpt { 
+  font-size: 0.875rem; 
+  color: #666; 
+  overflow: hidden; 
+  display: -webkit-box; 
+  -webkit-line-clamp: 3; 
+  -webkit-box-orient: vertical; 
+}
+
+.search-no-results { 
+  padding: 1rem; 
+  text-align: center; 
+  color: #666; 
+}
+
 /*
 .footnotes {
   margin-top: 2rem;
