@@ -56,14 +56,14 @@ if (!empty($_GET['id']) || !empty($_GET['id_post'])) {
     } else {
         $post = $content->getPostById($editPostId);
         if ($post) {
-            // Merge post data (from index, includes 'timestamp' from filename) with meta (from YAML)
-            $meta = array_merge($post, $post['meta']);
-            
             // Load original markdown content (not HTML)
-            $body = $post['html'] ? substr($post['html'], 0, -strlen($post['html'])) : '';
-            // We need to read the raw file for editing
             $raw = Utils::readFile($post['path']);
             $parsed = $content->readMarkdownWithMeta($post['path'], $raw);
+            
+            // Use YAML meta + timestamp from index (filename is source of truth for date)
+            $meta = $parsed['meta'];
+            $meta['timestamp'] = $post['timestamp'];
+            
             $body = $parsed['body'];
             $original_path = $post['path'];
             
@@ -116,9 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $editPostId = $post_id;
                 $mode = 'edit';
                 $post = $content->getPostById($post_id);
-                $meta = $post;
                 $original_path = $path;
                 $parsed = $content->readMarkdownWithMeta($path);
+                $meta = $parsed['meta'];
+                $meta['timestamp'] = $post['timestamp'];
                 $body = $parsed['body'];
             }
         }
@@ -779,11 +780,15 @@ img {
     <div class="row">
       <div>
         <label><?= Language::getText('reading_time_label') ?></label>
+        <?php 
+        // Check if reading_time is manually set in YAML (not just auto-calculated in index)
+        $isManualReadingTime = isset($parsed['meta']['reading_time']); 
+        ?>
         <select id="reading-time-mode" onchange="toggleReadingTimeInput()">
-          <option value="auto" <?= empty($meta['reading_time']) ? 'selected' : '' ?>><?= Language::getText('reading_time_auto') ?></option>
-          <option value="manual" <?= !empty($meta['reading_time']) ? 'selected' : '' ?>><?= Language::getText('reading_time_manual') ?></option>
+          <option value="auto" <?= !$isManualReadingTime ? 'selected' : '' ?>><?= Language::getText('reading_time_auto') ?></option>
+          <option value="manual" <?= $isManualReadingTime ? 'selected' : '' ?>><?= Language::getText('reading_time_manual') ?></option>
         </select>
-        <input type="number" name="reading_time" id="reading-time-input" min="1" value="<?= htmlspecialchars($meta['reading_time'] ?? '', ENT_QUOTES) ?>" data-auto-value="<?= htmlspecialchars($autoCalculatedReadingTime ?? '', ENT_QUOTES) ?>" style="<?= empty($meta['reading_time']) ? 'display:none;' : '' ?> margin-top: 5px;">
+        <input type="number" name="reading_time" id="reading-time-input" min="1" value="<?= htmlspecialchars($meta['reading_time'] ?? '', ENT_QUOTES) ?>" data-auto-value="<?= htmlspecialchars($autoCalculatedReadingTime ?? '', ENT_QUOTES) ?>" style="<?= !$isManualReadingTime ? 'display:none;' : '' ?> margin-top: 5px;">
       </div>
     </div>
     <div id="token-section" class="row <?= (isset($meta['status']) && $meta['status'] === Constants::POST_STATUS_PRIVATE) ? '' : 'hidden' ?>">

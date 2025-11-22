@@ -223,6 +223,7 @@ final class IndexManager
             'url' => $postMeta['url'],
             'html' => $html,
             'meta' => $parsed['meta'],
+            'reading_time' => $postMeta['reading_time'] ?? 1,
         ];
         
         // Include token if it exists (for private posts)
