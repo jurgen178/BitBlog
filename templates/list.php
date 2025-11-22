@@ -26,6 +26,10 @@ $title = $title ?? Language::getText('home');
               <a href="<?= Utils::e($baseUrl) ?>/index.php?tag=<?= urlencode((string)$t) ?>"><?= Utils::e($displayTag) ?></a><?= $i < count($p['tags']) - 1 ? ', ' : '' ?>
 <?php endforeach; ?>
 <?php endif; ?>
+          <?php if (isset($p['reading_time'])): ?>
+            <span>·</span>
+            <span>⏱️ <?= Language::getTextf('reading_time', $p['reading_time']) ?></span>
+          <?php endif; ?>
           <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($p['url']) ?>" data-title="<?= Utils::e($p['title']) ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
         </div>
         <br />

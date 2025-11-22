@@ -35,6 +35,7 @@ $meta = [
 // Post content and file tracking
 $body = "\n";
 $original_path = '';
+$autoCalculatedReadingTime = null; // Store auto-calculated reading time from index
 
 // Handle edit mode - load existing post for modification (support both 'id' and 'id_post')
 $editPostId = null;
@@ -57,6 +58,7 @@ if (!empty($_GET['id']) || !empty($_GET['id_post'])) {
         if ($post) {
             // Merge post data (from index, includes 'timestamp' from filename) with meta (from YAML)
             $meta = array_merge($post, $post['meta']);
+            
             // Load original markdown content (not HTML)
             $body = $post['html'] ? substr($post['html'], 0, -strlen($post['html'])) : '';
             // We need to read the raw file for editing
@@ -64,6 +66,16 @@ if (!empty($_GET['id']) || !empty($_GET['id_post'])) {
             $parsed = $content->readMarkdownWithMeta($post['path'], $raw);
             $body = $parsed['body'];
             $original_path = $post['path'];
+            
+            // Calculate reading time from body content (for data-auto-value)
+            // This is ALWAYS calculated, even if manual override exists in YAML
+            $html = \BitBlog\RenderMarkdown::toHtml($body);
+            $textOnly = preg_replace('/<[^>]*>/', ' ', $html);
+            $textOnly = html_entity_decode($textOnly, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $textOnly = preg_replace('/\s+/', ' ', $textOnly);
+            $textOnly = trim($textOnly);
+            $wordCount = str_word_count($textOnly);
+            $autoCalculatedReadingTime = max(1, (int)ceil($wordCount / 200));
         } else {
             $editError = 'post_not_found';
         }
@@ -157,8 +169,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $yaml .= 'token: ' . $token . "\n";
         }
         
-        $yaml .= 'tags: [' . implode(', ', array_map(fn($t) => '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $t) . '"', $tags)) . "]\n".
-                "---\n\n";
+        $yaml .= 'tags: [' . implode(', ', array_map(fn($t) => '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $t) . '"', $tags)) . "]\n";
+        
+        // Add reading_time only if manually set
+        $readingTime = isset($_POST['reading_time']) && $_POST['reading_time'] !== '' ? (int)$_POST['reading_time'] : 0;
+        if ($readingTime > 0) {
+            $yaml .= 'reading_time: ' . $readingTime . "\n";
+        }
+        
+        $yaml .= "---\n\n";
 
         $md = $yaml . $body;
 
@@ -239,6 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ($oldMeta['status'] ?? '') !== ($newMeta['status'] ?? '') ||
             ($oldMeta['category'] ?? '') !== ($newMeta['category'] ?? '') ||
             ($oldMeta['tags'] ?? '') !== ($newMeta['tags'] ?? '') ||
+            ($oldMeta['reading_time'] ?? '') !== ($newMeta['reading_time'] ?? '') ||
             realpath($original_path) !== realpath($dest) // filename changed (date changed)
         );
     } else {
@@ -754,6 +774,16 @@ img {
           <option value="<?= Constants::POST_STATUS_PUBLISHED ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_PUBLISHED)?'selected':'' ?>><?= Language::getText('status_published') ?></option>
           <option value="<?= Constants::POST_STATUS_PRIVATE ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_PRIVATE)?'selected':'' ?>><?= Language::getText('status_private') ?></option>
         </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label><?= Language::getText('reading_time_label') ?></label>
+        <select id="reading-time-mode" onchange="toggleReadingTimeInput()">
+          <option value="auto" <?= empty($meta['reading_time']) ? 'selected' : '' ?>><?= Language::getText('reading_time_auto') ?></option>
+          <option value="manual" <?= !empty($meta['reading_time']) ? 'selected' : '' ?>><?= Language::getText('reading_time_manual') ?></option>
+        </select>
+        <input type="number" name="reading_time" id="reading-time-input" min="1" value="<?= htmlspecialchars($meta['reading_time'] ?? '', ENT_QUOTES) ?>" data-auto-value="<?= htmlspecialchars($autoCalculatedReadingTime ?? '', ENT_QUOTES) ?>" style="<?= empty($meta['reading_time']) ? 'display:none;' : '' ?> margin-top: 5px;">
       </div>
     </div>
     <div id="token-section" class="row <?= (isset($meta['status']) && $meta['status'] === Constants::POST_STATUS_PRIVATE) ? '' : 'hidden' ?>">
@@ -1594,6 +1624,30 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initial UTC Zeit Anzeige
   updateUtcDateDisplay();
 });
+
+/**
+ * Toggle reading time manual input visibility
+ */
+function toggleReadingTimeInput() {
+  const mode = document.getElementById('reading-time-mode');
+  const input = document.getElementById('reading-time-input');
+  
+  if (!mode || !input) return;
+  
+  if (mode.value === 'manual') {
+    input.style.display = '';
+    // Pre-fill with auto-calculated value if switching from auto to manual
+    const autoValue = input.dataset.autoValue;
+    if (!input.value) {
+      // Use auto-calculated value or default to 1 minute
+      input.value = (autoValue && autoValue !== '') ? autoValue : '1';
+    }
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = '';
+  }
+}
 
 /* ==========================================================================
    DRAGGABLE TOOLBAR - Floating toolbar for fullscreen mode

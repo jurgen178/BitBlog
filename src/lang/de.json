@@ -167,6 +167,10 @@
     "share_post": "Beitrag teilen",
     "copy_link": "Link kopieren",
     "link_copied": "Link kopiert!",
+    "reading_time": "%d min",
+    "reading_time_label": "Lesezeit",
+    "reading_time_auto": "Automatisch berechnen",
+    "reading_time_manual": "Manuell (Minuten)",
     
     "general_settings": "Allgemeine Einstellungen",
     "display_settings": "Anzeige-Einstellungen", 
