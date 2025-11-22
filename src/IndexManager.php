@@ -81,8 +81,8 @@ final class IndexManager
             
             // Calculate reading time from content (or use manual override from meta)
             if (isset($meta['reading_time']) && is_numeric($meta['reading_time'])) {
-                // Manual override from YAML meta
-                $readingTime = max(1, (int)$meta['reading_time']);
+                // Manual override from YAML meta (1-90 minutes)
+                $readingTime = max(1, min(90, (int)$meta['reading_time']));
             } else {
                 // Automatic calculation: remove HTML tags completely, then count words
                 $html = RenderMarkdown::toHtml($post['body']);
@@ -95,7 +95,7 @@ final class IndexManager
                 $textOnly = trim($textOnly);
                 // Count words
                 $wordCount = str_word_count($textOnly);
-                $readingTime = max(1, (int)ceil($wordCount / 200)); // 200 words per minute
+                $readingTime = max(1, min(90, (int)ceil($wordCount / 200))); // 200 words per minute, max 90 min
             }
             
             $url = $this->baseUrl . '/index.php?id=' . $id;
@@ -223,7 +223,7 @@ final class IndexManager
             'url' => $postMeta['url'],
             'html' => $html,
             'meta' => $parsed['meta'],
-            'reading_time' => $postMeta['reading_time'] ?? 1,
+            'reading_time' => max(1, min(90, $postMeta['reading_time'] ?? 1)),
         ];
         
         // Include token if it exists (for private posts)

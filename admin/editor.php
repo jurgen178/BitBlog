@@ -788,7 +788,7 @@ img {
           <option value="auto" <?= !$isManualReadingTime ? 'selected' : '' ?>><?= Language::getText('reading_time_auto') ?></option>
           <option value="manual" <?= $isManualReadingTime ? 'selected' : '' ?>><?= Language::getText('reading_time_manual') ?></option>
         </select>
-        <input type="number" name="reading_time" id="reading-time-input" min="1" value="<?= htmlspecialchars($meta['reading_time'] ?? '', ENT_QUOTES) ?>" data-auto-value="<?= htmlspecialchars($autoCalculatedReadingTime ?? '', ENT_QUOTES) ?>" style="<?= !$isManualReadingTime ? 'display:none;' : '' ?> margin-top: 5px;">
+        <input type="number" name="reading_time" id="reading-time-input" min="1" max="90" value="<?= htmlspecialchars($meta['reading_time'] ?? '', ENT_QUOTES) ?>" data-auto-value="<?= htmlspecialchars($autoCalculatedReadingTime ?? '', ENT_QUOTES) ?>" style="<?= !$isManualReadingTime ? 'display:none;' : '' ?> margin-top: 5px;">
       </div>
     </div>
     <div id="token-section" class="row <?= (isset($meta['status']) && $meta['status'] === Constants::POST_STATUS_PRIVATE) ? '' : 'hidden' ?>">
