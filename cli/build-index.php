@@ -9,5 +9,5 @@ use BitBlog\Config;
 use BitBlog\Content;
 
 $c = new Content(Config::CONTENT_DIR, Config::CACHE_DIR, Config::BASE_URL());
-$c->rebuildIndex();
+$c->rebuildAll();
 echo "Index rebuilt.\n";
