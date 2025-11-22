@@ -23,6 +23,7 @@ $title = $post['title'];
           <a href="<?= Utils::e($baseUrl) ?>/index.php?tag=<?= urlencode((string)$t) ?>"><?= Utils::e($displayTag) ?></a><?= $i < count($post['tags']) - 1 ? ', ' : '' ?>
 <?php endforeach; ?>
 <?php endif; ?>
+      <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($baseUrl . '/index.php?id=' . $post['id']) ?>" data-title="<?= Utils::e($post['title']) ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
     </div>
   </header>
   <br />

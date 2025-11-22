@@ -172,6 +172,37 @@ img.blog {
   color: #2c5582;
 }
 
+/* Meta line with share button */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Share Button */
+.share-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  opacity: 0.5;
+  transition: opacity 0.2s, transform 0.2s;
+  line-height: 1;
+  margin-left: auto;
+}
+
+.share-button:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.share-button:active {
+  transform: scale(0.95);
+}
+
+
 /* Heading Sizes */
 h1 { font-size: 1.8rem; }
 h2 { font-size: 1.5rem; }
