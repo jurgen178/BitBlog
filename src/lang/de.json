@@ -163,6 +163,8 @@
     
     "search_placeholder": "Suche...",
     "no_search_results": "Keine Ergebnisse gefunden",
+    "invalid_regex_pattern": "Ungültiges Regex-Muster",
+    "search_help": "Alle Begriffe müssen vorkommen (UND), <code>\"Phrase\"</code> für exakte Treffer, <code>r\"regex\"</code> für Muster (oder <code>'</code>).",
     
     "share_post": "Beitrag teilen",
     "copy_link": "Link kopieren",

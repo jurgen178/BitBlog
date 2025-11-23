@@ -5,6 +5,7 @@
   const searchInputWrapper = document.getElementById('search-input-wrapper');
   const searchInput = document.getElementById('search-input');
   const searchResults = document.getElementById('search-results');
+  const searchHelp = document.getElementById('search-help');
   
   if (!searchToggle || !searchInputWrapper || !searchInput || !searchResults) {
     return; // Elements not found
@@ -18,6 +19,7 @@
     } else {
       searchInput.value = '';
       searchResults.classList.remove('active');
+      if (searchHelp) searchHelp.classList.remove('active');
     }
   });
   
@@ -36,23 +38,53 @@
     
     if (!query || !searchIndex) {
       searchResults.classList.remove('active');
+      if (searchHelp) searchHelp.classList.remove('active');
       return;
     }
     
+    // Show help when search is active
+    if (searchHelp) searchHelp.classList.add('active');
+    
     // Parse query to extract phrases (in quotes) and individual words
     const phrases = [];
+    const regexPatterns = [];
     const words = [];
     let remaining = query;
     
-    // Extract phrases in quotes (both " and ')
-    const quoteRegex = /["']([^"']+)["']/g;
+    // Extract regex patterns: r"pattern" or r'pattern' (balanced quotes)
+    const regexQuoteRegex = /r(["'])(.+?)\1/g;
     let match;
-    while ((match = quoteRegex.exec(query)) !== null) {
-      phrases.push(match[1].toLowerCase());
+    let invalidRegexPattern = null;
+    while ((match = regexQuoteRegex.exec(query)) !== null) {
+      try {
+        // Test if valid regex (match[2] is the pattern)
+        new RegExp(match[2], 'i');
+        regexPatterns.push(match[2]);
+        remaining = remaining.replace(match[0], ' ');
+      } catch (e) {
+        // Invalid regex - save for error message
+        invalidRegexPattern = match[2];
+        remaining = remaining.replace(match[0], ' ');
+      }
+    }
+    
+    // Show error if invalid regex found
+    if (invalidRegexPattern !== null) {
+      const invalidRegexText = searchInput.dataset.invalidRegexText || 'Invalid regex pattern';
+      searchResults.innerHTML = '<div class="search-no-results" style="color: #d32f2f; border-left: 3px solid #d32f2f;">' + invalidRegexText + ': <code>' + escapeHtml(invalidRegexPattern) + '</code></div>';
+      searchResults.classList.add('active');
+      return;
+    }
+    
+    // Extract phrases in quotes (both " and ') - balanced quotes only
+    const quoteRegex = /(["'])(.+?)\1/g;
+    while ((match = quoteRegex.exec(remaining)) !== null) {
+      phrases.push(match[2].toLowerCase());
       remaining = remaining.replace(match[0], ' ');
     }
     
     // Extract individual words from remaining text
+    // Don't remove quotes - treat them as searchable characters
     remaining.split(/\s+/).forEach(word => {
       word = word.trim();
       if (word) {
@@ -60,17 +92,31 @@
       }
     });
     
+    // If no search terms remain (e.g., only invalid regex), show no results
+    if (regexPatterns.length === 0 && phrases.length === 0 && words.length === 0) {
+      searchResults.classList.remove('active');
+      return;
+    }
+    
     const results = [];
     
     for (const id in searchIndex) {
       const post = searchIndex[id];
       const searchText = post.title + ' ' + post.content;
       
-      // AND search: all phrases and words must be present
+      // AND search: all regex patterns, phrases and words must match
+      const allRegexMatch = regexPatterns.every(pattern => {
+        try {
+          const regex = new RegExp(pattern, 'i');
+          return regex.test(searchText);
+        } catch (e) {
+          return false;
+        }
+      });
       const allPhrasesMatch = phrases.every(phrase => searchText.includes(phrase));
       const allWordsMatch = words.every(word => searchText.includes(word));
       
-      if (allPhrasesMatch && allWordsMatch) {
+      if (allRegexMatch && allPhrasesMatch && allWordsMatch) {
         results.push({ id, ...post });
       }
     }
@@ -86,12 +132,40 @@
     } else {
       const maxResults = 10;
       const allTerms = [...phrases, ...words];
-      searchResults.innerHTML = results.slice(0, maxResults).map(post => 
-        '<a href="' + post.url + '" class="search-result-item">' +
-          '<div class="search-result-title">' + highlightText(post.original_title, allTerms) + '</div>' +
-          '<div class="search-result-excerpt">' + highlightText(getExcerptWithMatch(post.original_content, post.content, allTerms, 200), allTerms) + '</div>' +
-        '</a>'
-      ).join('');
+      
+      searchResults.innerHTML = results.slice(0, maxResults).map(post => {
+        // Extract regex matches for THIS post
+        const regexMatches = [];
+        if (regexPatterns.length > 0) {
+          regexPatterns.forEach(pattern => {
+            try {
+              const regex = new RegExp(pattern, 'gi');
+              const sampleText = post.title + ' ' + post.content;
+              let match;
+              let count = 0;
+              const maxSamples = 20;
+              
+              while ((match = regex.exec(sampleText)) !== null && count++ < maxSamples) {
+                if (match[0] && match[0].length > 0 && !regexMatches.includes(match[0])) {
+                  regexMatches.push(match[0]);
+                }
+                if (match.index === regex.lastIndex) {
+                  regex.lastIndex++;
+                }
+              }
+            } catch (e) {
+              // Ignore invalid regex
+            }
+          });
+        }
+        
+        const highlightTerms = [...allTerms, ...regexMatches];
+        
+        return '<a href="' + escapeHtml(post.url) + '" class="search-result-item">' +
+          '<div class="search-result-title">' + highlightText(post.original_title, highlightTerms) + '</div>' +
+          '<div class="search-result-excerpt">' + highlightText(getExcerptWithMatch(post.original_content, post.content, allTerms, regexPatterns, 200), highlightTerms) + '</div>' +
+        '</a>';
+      }).join('');
     }
     
     searchResults.classList.add('active');
@@ -104,22 +178,38 @@
     }
   });
   
-  // Helper: Capitalize first letter
-  function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  // Helper: Escape HTML entities to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
   
   // Helper: Get excerpt around first match
-  function getExcerptWithMatch(originalText, lowerText, terms, maxLength) {
+  function getExcerptWithMatch(originalText, lowerText, terms, regexPatterns, maxLength) {
     let firstMatchPos = -1;
     let matchLength = 0;
     
-    // Find position of first matching term (phrase or word)
+    // Check simple terms (phrases and words)
     for (const term of terms) {
-      const pos = lowerText.indexOf(term);
+      const pos = lowerText.indexOf(term.toLowerCase());
       if (pos !== -1 && (firstMatchPos === -1 || pos < firstMatchPos)) {
         firstMatchPos = pos;
         matchLength = term.length;
+      }
+    }
+    
+    // Check regex patterns
+    for (const pattern of regexPatterns) {
+      try {
+        const regex = new RegExp(pattern, 'i');
+        const match = regex.exec(lowerText);
+        if (match && (firstMatchPos === -1 || match.index < firstMatchPos)) {
+          firstMatchPos = match.index;
+          matchLength = match[0].length;
+        }
+      } catch (e) {
+        // Invalid regex, skip
       }
     }
     
@@ -153,15 +243,26 @@
   
   // Helper: Highlight search terms
   function highlightText(text, terms) {
-    let highlighted = capitalize(text);
+    // First escape HTML to prevent XSS and broken HTML
+    let highlighted = escapeHtml(text);
+    
     // Sort by length (longest first) to avoid partial highlighting issues
     const sortedTerms = [...terms].sort((a, b) => b.length - a.length);
-    sortedTerms.forEach(term => {
+    
+    // Limit number of terms to prevent performance issues with regex patterns
+    const maxTerms = 50;
+    const limitedTerms = sortedTerms.slice(0, maxTerms);
+    
+    limitedTerms.forEach(term => {
+      // Escape the search term for HTML
+      const escapedTerm = escapeHtml(term);
       // Escape regex special characters
-      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escaped = escapedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Match the escaped version in the already-escaped text
       const regex = new RegExp('(' + escaped + ')', 'gi');
       highlighted = highlighted.replace(regex, '<mark style="background: #fff59d;">$1</mark>');
     });
+    
     return highlighted;
   }
 })();

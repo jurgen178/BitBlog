@@ -244,29 +244,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dest = $destDir . '/' . $datePrefix . 'T' . $timeStr . '.' . $id . '.md';
     }
 
-    // Check if index rebuild is needed BEFORE making changes
-    $needsIndexRebuild = false;
-    
-    if ($original_path && file_exists($original_path)) {
-        // Compare old and new metadata
-        $oldContent = file_get_contents($original_path);
-        $oldMeta = $content->parseMarkdown($oldContent);
-        $newMeta = $content->parseMarkdown($md);
-        
-        // Check if important metadata changed
-        $needsIndexRebuild = (
-            ($oldMeta['title'] ?? '') !== ($newMeta['title'] ?? '') ||
-            ($oldMeta['status'] ?? '') !== ($newMeta['status'] ?? '') ||
-            ($oldMeta['category'] ?? '') !== ($newMeta['category'] ?? '') ||
-            ($oldMeta['tags'] ?? '') !== ($newMeta['tags'] ?? '') ||
-            ($oldMeta['reading_time'] ?? '') !== ($newMeta['reading_time'] ?? '') ||
-            realpath($original_path) !== realpath($dest) // filename changed (date changed)
-        );
-    } else {
-        // New post always needs index rebuild
-        $needsIndexRebuild = true;
-    }
-
     // Remove old file if filename changed (date was changed)
     if ($original_path && realpath($original_path) !== realpath($dest) && file_exists($original_path)) {
         unlink($original_path);
@@ -275,9 +252,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Save content to new/updated filename
     file_put_contents($dest, $md);
     
-    if ($needsIndexRebuild) {
-        $content->rebuildAll();
-    }
+    // Always rebuild index after saving to keep search current
+    $content->rebuildAll();
 
     header('Location: admin.php');
     exit;

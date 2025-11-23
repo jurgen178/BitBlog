@@ -163,6 +163,8 @@
     
     "search_placeholder": "Search...",
     "no_search_results": "No results found",
+    "invalid_regex_pattern": "Invalid regex pattern",
+    "search_help": "All terms must match (AND), <code>\"phrase\"</code> for exact matches, <code>r\"regex\"</code> for patterns (or <code>'</code>).",
     
     "share_post": "Share post",
     "copy_link": "Copy link",

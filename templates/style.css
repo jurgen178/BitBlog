@@ -314,9 +314,37 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.5; 
 }
 
+.search-help {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #e9ecef;
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #666;
+  display: none;
+  z-index: 999;
+  line-height: 1.4;
+}
+
+.search-help.active {
+  display: block;
+}
+
+.search-help code {
+  background: #e9ecef;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+}
+
 .search-results { 
   position: absolute; 
-  top: 100%; 
+  top: calc(100% + 2.5rem);
   left: 0; 
   right: 0; 
   background: white; 
