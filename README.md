@@ -56,7 +56,7 @@
 
 ### Prerequisites
 - PHP 8.0 or higher (tested with PHP 8.4)
-- Web server with PHP support (Apache, Nginx, or PHP built-in server)
+- Web server with PHP support
 
 ### Installation
 
@@ -359,8 +359,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [ParsedownExtra](https://github.com/erusev/parsedown-extra) for Markdown processing
-- Inspired by simple, file-based CMS systems
+- Built with [Parsedown](https://github.com/erusev/parsedown) and [ParsedownExtra](https://github.com/erusev/parsedown-extra) for Markdown processing
 
 ---
 
