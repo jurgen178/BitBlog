@@ -152,6 +152,9 @@ final class IndexManager
             $html = RenderMarkdown::toHtml($parsed['body']);
             $plainText = strip_tags($html);
             
+            // Decode HTML entities to plain text (e.g., &lt; → <, &amp; → &)
+            $plainText = html_entity_decode($plainText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            
             // Normalize whitespace: replace multiple spaces, newlines, tabs with single space
             $plainText = preg_replace('/\s+/', ' ', $plainText);
             $plainText = trim($plainText);
