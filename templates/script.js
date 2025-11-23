@@ -143,11 +143,15 @@
               const sampleText = post.title + ' ' + post.content;
               let match;
               let count = 0;
-              const maxSamples = 20;
+              const maxSamples = 1000;
               
               while ((match = regex.exec(sampleText)) !== null && count++ < maxSamples) {
-                if (match[0] && match[0].length > 0 && !regexMatches.includes(match[0])) {
-                  regexMatches.push(match[0]);
+                const matchText = match[0];
+                // Skip matches that are too short or only whitespace/punctuation
+                if (matchText && matchText.length > 0 && /[a-z0-9]/i.test(matchText)) {
+                  if (!regexMatches.includes(matchText)) {
+                    regexMatches.push(matchText);
+                  }
                 }
                 if (match.index === regex.lastIndex) {
                   regex.lastIndex++;
@@ -256,10 +260,11 @@
     limitedTerms.forEach(term => {
       // Escape the search term for HTML
       const escapedTerm = escapeHtml(term);
-      // Escape regex special characters
+      // Escape regex special characters for literal matching
       const escaped = escapedTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Match the escaped version in the already-escaped text
-      const regex = new RegExp('(' + escaped + ')', 'gi');
+      // Match only outside of existing HTML tags (negative lookahead for tags)
+      // Use word boundary or position assertions to avoid matching inside tags
+      const regex = new RegExp('(' + escaped + ')(?![^<]*>|[^<>]*<\\/)', 'gi');
       highlighted = highlighted.replace(regex, '<mark style="background: #fff59d;">$1</mark>');
     });
     
