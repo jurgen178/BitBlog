@@ -50,7 +50,13 @@ final class RenderMarkdown
             // Even indices are outside code blocks, odd indices are code blocks
             if ($i % 2 === 0) {
                 // Decode entities outside code blocks
+                // ParsedownExtra double-escapes entities: ↩ → &larrhk; → &amp;larrhk;
+                // So we need to decode TWICE to get back to UTF-8
+                // Note: A 3rd decode would make no further changes
                 $part = html_entity_decode($part, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $part = html_entity_decode($part, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                
+                // Additional manual replacements for entities that html_entity_decode might miss
                 $part = str_replace([
                     '&equals;', '&colon;', '&semi;', '&percnt;', '&comma;', '&period;',
                     '&lpar;', '&rpar;', '&lowbar;', '&NewLine;', '&Tab;', '&excl;',
