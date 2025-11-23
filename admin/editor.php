@@ -697,7 +697,6 @@ img {
   <nav>
     <button type="submit" form="editor-form">💾 <?= Language::getText('save') ?></button>
     <a href="admin.php">📊 <?= Language::getText('dashboard') ?></a>
-    <a href="admin.php?action=logout">🚪 <?= Language::getText('logout') ?></a>
   </nav>
 </header>
 <main>

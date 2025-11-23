@@ -279,7 +279,6 @@ if (empty($_SESSION[Constants::SESSION_CSRF])) {
   <nav>
     <button type="submit" form="signature-form">💾 <?= Language::getText('save_signature') ?></button>
     <a href="admin.php">📊 <?= Language::getText('dashboard') ?></a>
-    <a href="admin.php?action=logout">🚪 <?= Language::getText('logout') ?></a>
   </nav>
 </header>
 <main>
