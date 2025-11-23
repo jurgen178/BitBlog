@@ -41,7 +41,6 @@ if (!isset($_GET['confirm']) || $_GET['confirm'] !== '1') {
   <strong>🗑️ <?= Language::getText('confirm_delete_title') ?></strong>
   <nav>
     <a href="admin.php">📊 <?= Language::getText('dashboard') ?></a>
-    <a href="admin.php?action=logout">🚪 <?= Language::getText('logout') ?></a>
   </nav>
 </header>
 <main>
