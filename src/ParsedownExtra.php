@@ -535,7 +535,7 @@ class ParsedownExtra extends Parsedown
                         'rev' => 'footnote',
                         'class' => 'footnote-backref',
                     ),
-                    'rawHtml' => '&#8617;',
+                    'rawHtml' => '↩',
                     'allowRawHtmlInSafeMode' => true,
                     'autobreak' => false,
                 );
