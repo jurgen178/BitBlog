@@ -104,15 +104,19 @@
       return originalText.substring(0, maxLength) + (originalText.length > maxLength ? '...' : '');
     }
     
-    // Position match in first third of window (not center)
+    // Position match in first third of window
     const matchMiddle = firstMatchPos + Math.floor(matchLength / 2);
     let start = Math.max(0, matchMiddle - Math.floor(maxLength / 3));
-    let end = start + maxLength;
+    let end = Math.min(originalText.length, start + maxLength);
     
-    // Adjust if we exceed text length
-    if (end > originalText.length) {
-      end = originalText.length;
-      start = Math.max(0, end - maxLength);
+    // Ensure match stays in first third even if text is short
+    // If match would be beyond first third of actual excerpt, adjust start
+    const actualLength = end - start;
+    const matchPosInExcerpt = firstMatchPos - start;
+    if (matchPosInExcerpt > actualLength / 3) {
+      // Recalculate: match should be at 1/3 position
+      start = Math.max(0, firstMatchPos - Math.floor(actualLength / 3));
+      end = Math.min(originalText.length, start + maxLength);
     }
     
     // Add ellipsis as needed
