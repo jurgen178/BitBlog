@@ -32,22 +32,45 @@
   
   // Search on input
   searchInput.addEventListener('input', function() {
-    const query = this.value.toLowerCase().trim();
+    const query = this.value.trim();
     
     if (!query || !searchIndex) {
       searchResults.classList.remove('active');
       return;
     }
     
-    const words = query.split(/\s+/);
+    // Parse query to extract phrases (in quotes) and individual words
+    const phrases = [];
+    const words = [];
+    let remaining = query;
+    
+    // Extract phrases in quotes (both " and ')
+    const quoteRegex = /["']([^"']+)["']/g;
+    let match;
+    while ((match = quoteRegex.exec(query)) !== null) {
+      phrases.push(match[1].toLowerCase());
+      remaining = remaining.replace(match[0], ' ');
+    }
+    
+    // Extract individual words from remaining text
+    remaining.split(/\s+/).forEach(word => {
+      word = word.trim();
+      if (word) {
+        words.push(word.toLowerCase());
+      }
+    });
+    
     const results = [];
     
     for (const id in searchIndex) {
       const post = searchIndex[id];
       const searchText = post.title + ' ' + post.content;
       
-      // AND search: all words must be present
-      if (words.every(word => searchText.includes(word))) {
+      // AND search: all phrases and words must be present
+      const allPhrasesMatch = phrases.every(phrase => searchText.includes(phrase));
+      const allWordsMatch = words.every(word => searchText.includes(word));
+      
+      if (allPhrasesMatch && allWordsMatch) {
         results.push({ id, ...post });
       }
     }
@@ -62,10 +85,11 @@
       searchResults.innerHTML = '<div class="search-no-results">' + noResultsText + '</div>';
     } else {
       const maxResults = 10;
+      const allTerms = [...phrases, ...words];
       searchResults.innerHTML = results.slice(0, maxResults).map(post => 
         '<a href="' + post.url + '" class="search-result-item">' +
-          '<div class="search-result-title">' + highlightText(post.original_title, words) + '</div>' +
-          '<div class="search-result-excerpt">' + highlightText(getExcerptWithMatch(post.original_content, post.content, words, 200), words) + '</div>' +
+          '<div class="search-result-title">' + highlightText(post.original_title, allTerms) + '</div>' +
+          '<div class="search-result-excerpt">' + highlightText(getExcerptWithMatch(post.original_content, post.content, allTerms, 200), allTerms) + '</div>' +
         '</a>'
       ).join('');
     }
@@ -86,16 +110,16 @@
   }
   
   // Helper: Get excerpt around first match
-  function getExcerptWithMatch(originalText, lowerText, words, maxLength) {
+  function getExcerptWithMatch(originalText, lowerText, terms, maxLength) {
     let firstMatchPos = -1;
     let matchLength = 0;
     
-    // Find position of first matching word
-    for (const word of words) {
-      const pos = lowerText.indexOf(word);
+    // Find position of first matching term (phrase or word)
+    for (const term of terms) {
+      const pos = lowerText.indexOf(term);
       if (pos !== -1 && (firstMatchPos === -1 || pos < firstMatchPos)) {
         firstMatchPos = pos;
-        matchLength = word.length;
+        matchLength = term.length;
       }
     }
     
@@ -128,11 +152,13 @@
   }
   
   // Helper: Highlight search terms
-  function highlightText(text, words) {
+  function highlightText(text, terms) {
     let highlighted = capitalize(text);
-    words.forEach(word => {
+    // Sort by length (longest first) to avoid partial highlighting issues
+    const sortedTerms = [...terms].sort((a, b) => b.length - a.length);
+    sortedTerms.forEach(term => {
       // Escape regex special characters
-      const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp('(' + escaped + ')', 'gi');
       highlighted = highlighted.replace(regex, '<mark style="background: #fff59d;">$1</mark>');
     });
