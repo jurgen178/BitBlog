@@ -27,7 +27,7 @@ $title = $post['title'];
         <span>·</span>
         <span>⏱️ <?= Language::getTextf('reading_time', $post['reading_time']) ?></span>
       <?php endif; ?>
-      <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($baseUrl . '/index.php?id=' . $post['id']) ?>" data-title="<?= Utils::e($post['title']) ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
+      <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($baseUrl . '/index.php?id=' . $post['id']) ?>" data-title="<?= Utils::e($post['title']) ?>" data-copy-link-text="<?= Language::getText('copy_link') ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
     </div>
   </header>
   <br />

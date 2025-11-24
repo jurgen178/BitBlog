@@ -29,8 +29,7 @@ use BitBlog\Language;
                data-base-url="<?= Utils::e($baseUrl) ?>"
                data-cache-version="<?= @filemtime(__DIR__ . '/../cache/search-index.json') ?: 0 ?>"
                data-no-results-text="<?= Language::getText('no_search_results') ?>"
-               data-invalid-regex-text="<?= Language::getText('invalid_regex_pattern') ?>"
-               data-copy-link-text="<?= Language::getText('copy_link') ?>">
+               data-invalid-regex-text="<?= Language::getText('invalid_regex_pattern') ?>">
         <span class="search-icon">🔍</span>
         <div id="search-help" class="search-help"><?= Language::getText('search_help') ?></div>
         <div id="search-results" class="search-results"></div>
