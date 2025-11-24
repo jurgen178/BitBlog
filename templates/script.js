@@ -130,7 +130,7 @@
     if (results.length === 0) {
       searchResults.innerHTML = '<div class="search-no-results">' + noResultsText + '</div>';
     } else {
-      const maxResults = 10;
+      const maxResults = 16;
       const allTerms = [...phrases, ...words];
       
       searchResults.innerHTML = results.slice(0, maxResults).map(post => {
@@ -147,8 +147,8 @@
               
               while ((match = regex.exec(sampleText)) !== null && count++ < maxSamples) {
                 const matchText = match[0];
-                // Skip matches that are too short or only whitespace/punctuation
-                if (matchText && matchText.length > 0 && /[a-z0-9]/i.test(matchText)) {
+                // Skip empty matches
+                if (matchText && matchText.length > 0) {
                   if (!regexMatches.includes(matchText)) {
                     regexMatches.push(matchText);
                   }
