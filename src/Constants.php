@@ -26,6 +26,7 @@ final class Constants
     // Routes
     public const ROUTE_HOME = 'home';
     public const ROUTE_POST = 'post';
+    public const ROUTE_POST_BY_NAME = 'post_by_name';
     public const ROUTE_TAG = 'tag';
     public const ROUTE_PAGE = 'page';
     public const ROUTE_FEED = 'feed';

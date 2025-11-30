@@ -73,6 +73,7 @@ final class IndexManager
             $status = strtolower((string)($meta['status'] ?? Constants::POST_STATUS_PUBLISHED));
             $tags = $this->markdownProcessor->toStringArray($meta['tags'] ?? []);
             $token = isset($meta['token']) ? (string)$meta['token'] : null;
+            $name = isset($meta['name']) ? $this->sanitizeName((string)$meta['name']) : null;
             
             // Extract ID from filename format: YYYY-MM-DD.ID.md
             $filename = basename($path, '.md');
@@ -116,6 +117,11 @@ final class IndexManager
                 $postData['token'] = $token;
             }
             
+            // Only include name if it exists
+            if ($name !== null) {
+                $postData['name'] = $name;
+            }
+            
             $posts[] = $postData;
         }
         usort($posts, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
@@ -136,6 +142,32 @@ final class IndexManager
      * @param array $posts Array of post metadata
      * @return void
      */
+    /**
+     * Sanitize and validate name field for URL safety
+     * Only allows: lowercase letters, numbers, hyphens
+     * 
+     * @param string $name Raw name from markdown meta
+     * @return string|null Sanitized name or null if invalid
+     */
+    private function sanitizeName(string $name): ?string
+    {
+        // Convert to lowercase and trim
+        $name = strtolower(trim($name));
+        
+        // Only allow: a-z, 0-9, hyphen
+        // Remove everything else
+        $name = preg_replace('/[^a-z0-9-]/', '', $name);
+        
+        // Remove multiple consecutive hyphens
+        $name = preg_replace('/-+/', '-', $name);
+        
+        // Remove leading/trailing hyphens
+        $name = trim($name, '-');
+        
+        // Must have at least 1 character
+        return (strlen($name) > 0) ? $name : null;
+    }
+
     private function buildSearchIndex(array $posts): void
     {
         $searchIndex = [];
@@ -232,6 +264,59 @@ final class IndexManager
         // Include token if it exists (for private posts)
         if (isset($postMeta['token'])) {
             $result['token'] = $postMeta['token'];
+        }
+        
+        return $result;
+    }
+
+    public function getPostByName(string $name): ?array
+    {
+        // Sanitize input to match stored format
+        $name = $this->sanitizeName($name);
+        if (empty($name)) return null;
+        
+        // Search index for matching name
+        $index = $this->getIndex();
+        
+        $postMeta = null;
+        foreach ($index as $post) {
+            if (isset($post['name']) && $post['name'] === $name) {
+                $postMeta = $post;
+                break;
+            }
+        }
+        
+        if (!$postMeta) return null;
+        
+        // Load only the specific file
+        $path = $postMeta['path'];
+        if (!is_file($path)) return null;
+        
+        $raw = Utils::readFile($path);
+        $parsed = $this->markdownProcessor->readMarkdownWithMeta($path, $raw);
+        $html = RenderMarkdown::toHtml($parsed['body']);
+        
+        $result = [
+            'id' => $postMeta['id'],
+            'title' => $postMeta['title'],
+            'timestamp' => $postMeta['timestamp'],
+            'status' => $postMeta['status'],
+            'tags' => $postMeta['tags'],
+            'path' => $path,
+            'url' => $postMeta['url'],
+            'html' => $html,
+            'meta' => $parsed['meta'],
+            'reading_time' => max(1, min(90, $postMeta['reading_time'] ?? 1)),
+        ];
+        
+        // Include token if it exists (for private posts)
+        if (isset($postMeta['token'])) {
+            $result['token'] = $postMeta['token'];
+        }
+        
+        // Include name if it exists
+        if (isset($postMeta['name'])) {
+            $result['name'] = $postMeta['name'];
         }
         
         return $result;

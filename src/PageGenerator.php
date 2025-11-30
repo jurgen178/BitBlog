@@ -230,6 +230,9 @@ final class PageGenerator
                             $date = new \DateTime('@' . $post['timestamp']);
                             echo $date->format('d.m.Y');
 ?>)</a>
+<?php if (isset($post['name']) && $post['name'] !== ''): ?>
+                        <a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-link">📄<?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+<?php endif; ?>
                     </li>
 <?php endforeach; ?>
                 </ul>
@@ -387,7 +390,11 @@ final class PageGenerator
                     } else {
                         echo htmlspecialchars($post['url']);
                     }
-?>" class="post-title" <?= $isEdit ? 'target="_blank" rel="noopener"' : '' ?>><?= htmlspecialchars($post['title']) ?></a></td>
+?>" class="post-title" <?= $isEdit ? 'target="_blank" rel="noopener"' : '' ?>><?= htmlspecialchars($post['title']) ?></a>
+<?php if (isset($post['name']) && $post['name'] !== ''): ?>
+<br><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-title">📄<?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+<?php endif; ?>
+</td>
                     <td class="post-categories">
 <?php if (empty($post['tags'])): ?>
 <span class="category-tag"><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?tag=<?= urlencode(Language::getText('uncategorized')) ?>" class="category-tag"><?= htmlspecialchars(Language::getText('uncategorized')) ?></a></span>

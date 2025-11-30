@@ -160,6 +160,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($title === '') { $title = Language::getText('default_post_title'); }
         
+        // Sanitize name field (optional)
+        $name = trim($_POST['name'] ?? '');
+        if ($name !== '') {
+            // Validate and sanitize name: only a-z, 0-9, hyphen
+            $name = strtolower($name);
+            $name = preg_replace('/[^a-z0-9-]/', '', $name);
+            $name = preg_replace('/-+/', '-', $name);
+            $name = trim($name, '-');
+            
+            // Clear if empty after sanitization
+            if ($name === '') {
+                $name = null;
+            }
+        } else {
+            $name = null;
+        }
+        
         // Create YAML - always quote title to handle special characters (escape order: \ first, then ")
         $yaml = "---\n".
                 'title: "' . str_replace(['\\', '"'], ['\\\\', '\\"'], $title) . "\"\n".
@@ -171,6 +188,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         $yaml .= 'tags: [' . implode(', ', array_map(fn($t) => '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $t) . '"', $tags)) . "]\n";
+        
+        // Add name only if set
+        if ($name !== null) {
+            $yaml .= 'name: ' . $name . "\n";
+        }
         
         // Add reading_time only if manually set
         $readingTime = isset($_POST['reading_time']) && $_POST['reading_time'] !== '' ? (int)$_POST['reading_time'] : 0;
@@ -454,6 +476,18 @@ body {
   display: none;
 }
 
+/* Name field hint */
+.name-field-hint {
+  color: #888;
+  display: block;
+  margin-top: 3px;
+}
+
+.optional-hint {
+  color: #888;
+  font-size: 0.9em;
+}
+
 /* Button Styles - only for button elements */
 button.btn-primary {
   padding: 6px 12px;
@@ -706,12 +740,20 @@ img {
         <label><?= Language::getText('title') ?></label>
         <input type="text" name="title" value="<?= htmlspecialchars($meta['title'] ?? '', ENT_QUOTES) ?>">
       </div>
-      <?php if ($mode === 'edit' && $editPostId): ?>
       <div>
         <label><?= Language::getText('post_id') ?></label>
-        <input type="text" value="<?= htmlspecialchars($editPostId, ENT_QUOTES) ?>" disabled>
+        <input type="text" value="<?= $mode === 'edit' && $editPostId ? htmlspecialchars($editPostId, ENT_QUOTES) : '(auto)' ?>" disabled>
       </div>
-<?php endif; ?>
+    </div>
+    <div class="row">
+      <div></div>
+      <div>
+        <label>Name (URL) <span class="optional-hint">– optional</span></label>
+        <input type="text" name="name" value="<?= htmlspecialchars($meta['name'] ?? '', ENT_QUOTES) ?>" placeholder="z.B. mein-artikel">
+        <small class="name-field-hint">
+          <?= Language::getText('name_field_hint') ?>
+        </small>
+      </div>
     </div>
     <div class="row">
       <div>

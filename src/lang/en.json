@@ -204,5 +204,7 @@
     "setup_success_title": "Administrator account created!",
     "setup_copy_instructions": "Copy these lines into the file <code>src/Config.php</code>:",
     "setup_replace_instructions": "Remove these lines:",
-    "setup_after_save": "After saving, you can log in with your username and password."
+    "setup_after_save": "After saving, you can log in with your username and password.",
+    "name_field_hint": "Only a-z, 0-9 and hyphens allowed. Allows URLs like: ?name=my-article",
+    "view_via_name": "View via name"
 }

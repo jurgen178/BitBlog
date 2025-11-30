@@ -312,9 +312,12 @@ switch ($action) {
         <td>
           <a href="admin.php?action=editor&id=<?= $p['id'] ?>" title="<?= Language::getText('edit') ?>">✏️</a>
 <?php if ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])): ?>
-          <a href="index.php?id=<?= $p['id'] ?>&token=<?= urlencode($p['token']) ?>" target="_blank" title="<?= Language::getText('view') ?>">📄</a>
+          <a href="index.php?id=<?= $p['id'] ?>&token=<?= urlencode($p['token']) ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
 <?php else: ?>
-          <a href="index.php?id=<?= $p['id'] ?>" target="_blank" title="<?= Language::getText('view') ?>">📄</a>
+          <a href="index.php?id=<?= $p['id'] ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
+<?php endif; ?>
+<?php if (isset($p['name']) && $p['name'] !== ''): ?>
+          <a href="index.php?name=<?= urlencode($p['name']) ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" title="<?= Language::getText('view_via_name') ?>: <?= htmlspecialchars($p['name']) ?>">📄</a>
 <?php endif; ?>
           <a href="admin.php?action=delete&id=<?= $p['id'] ?>" class="post-delete-link" title="<?= Language::getText('delete') ?>">🗑️</a>
         </td>

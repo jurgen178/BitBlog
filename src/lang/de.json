@@ -204,5 +204,7 @@
     "setup_success_title": "Administrator-Account erstellt!",
     "setup_copy_instructions": "Kopiere diese Zeilen in die Datei <code>src/Config.php</code>:",
     "setup_replace_instructions": "Lösche diese Zeilen:",
-    "setup_after_save": "Nach dem Speichern kannst du dich mit deinem Benutzernamen und Passwort einloggen."
+    "setup_after_save": "Nach dem Speichern kannst du dich mit deinem Benutzernamen und Passwort einloggen.",
+    "name_field_hint": "Nur a-z, 0-9 und Bindestrich erlaubt. Erlaubt URLs wie: ?name=mein-artikel",
+    "view_via_name": "Ansehen via Name"
 }

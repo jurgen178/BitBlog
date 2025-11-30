@@ -76,6 +76,39 @@ switch ($route['name']) {
         ]);
         break;
 
+    case Constants::ROUTE_POST_BY_NAME:
+        $name = $route['params']['name'];
+        $post = $content->getPostByName($name);
+        
+        // Check if post exists and handle status-based access control
+        if (!$post) {
+            http_response_code(404);
+            echo $renderer->render('page', ['title' => Language::getText('not_found'), 'html' => '<p>' . Language::getText('post_not_found') . '</p>']);
+            break;
+        }
+        
+        // Published and Draft posts - always accessible
+        if ($post['status'] === Constants::POST_STATUS_PUBLISHED || $post['status'] === Constants::POST_STATUS_DRAFT) {
+            echo $renderer->render('post', ['post' => $post, 'tags' => $content->getTagCloud()]);
+            break;
+        }
+        
+        // Private posts - require valid token
+        if ($post['status'] === Constants::POST_STATUS_PRIVATE) {
+            $requiredToken = $post['token'] ?? null;
+            $providedToken = $_GET['token'] ?? null;
+            
+            if ($requiredToken && $requiredToken === $providedToken) {
+                echo $renderer->render('post', ['post' => $post, 'tags' => $content->getTagCloud()]);
+                break;
+            }
+        }
+        
+        // Invalid token for private post - return 404 (don't reveal existence)
+        http_response_code(404);
+        echo $renderer->render('page', ['title' => Language::getText('not_found'), 'html' => '<p>' . Language::getText('post_not_found') . '</p>']);
+        break;
+
     case Constants::ROUTE_POST:
         $id = $route['params']['id'];
         $post = $content->getPostById($id);

@@ -12,6 +12,13 @@ final class Router
 
     public function match(): array
     {
+        // Check for name parameter first
+        if (isset($_GET['name'])) {
+            $name = (string)$_GET['name'];
+            $token = isset($_GET['token']) ? (string)$_GET['token'] : null;
+            return ['name' => Constants::ROUTE_POST_BY_NAME, 'params' => ['name' => $name, 'token' => $token]];
+        }
+        
         // Check for specific GET parameters
         if (isset($_GET['id']) || isset($_GET['id_post'])) {
             $id = (int)($_GET['id'] ?? $_GET['id_post']);
