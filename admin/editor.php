@@ -735,6 +735,7 @@ img {
     <input type="hidden" name="csrf" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <input type="hidden" name="original_path" value="<?= htmlspecialchars($original_path, ENT_QUOTES) ?>">
     <input type="hidden" name="post_id" value="<?= htmlspecialchars($editPostId ?? 0, ENT_QUOTES) ?>">
+    <input type="hidden" id="all-post-names" value="<?= htmlspecialchars(json_encode(array_values(array_filter(array_map(fn($p) => isset($p['name']) && $p['name'] !== '' ? ['id' => $p['id'], 'name' => $p['name'], 'title' => $p['title'] ?? ''] : null, $content->getIndex())))), ENT_QUOTES, 'UTF-8') ?>">
     <div class="row">
       <div>
         <label><?= Language::getText('title') ?></label>
@@ -749,7 +750,7 @@ img {
       <div></div>
       <div>
         <label>Name (URL) <span class="optional-hint">– optional</span></label>
-        <input type="text" name="name" value="<?= htmlspecialchars($meta['name'] ?? '', ENT_QUOTES) ?>" placeholder="z.B. mein-artikel">
+        <input type="text" name="name" value="<?= htmlspecialchars($meta['name'] ?? '', ENT_QUOTES) ?>" placeholder="<?= Language::getText('name_placeholder') ?>">
         <small class="name-field-hint">
           <?= Language::getText('name_field_hint') ?>
         </small>
@@ -946,6 +947,13 @@ img {
 
 // Translations for JavaScript
 const TRANSLATIONS = {
+  duplicateNameAlert: '<?= Language::getText("duplicate_name_alert") ?>',
+  duplicateNameTitle: '<?= Language::getText("duplicate_name_title") ?>',
+  duplicateNameIntro: '<?= Language::getText("duplicate_name_intro") ?>',
+  duplicateNameFooter: '<?= Language::getText("duplicate_name_footer") ?>',
+  postId: '<?= Language::getText("post_id") ?>',
+  noTitle: '<?= Language::getText("no_title") ?>',
+  openOtherPost: '<?= Language::getText("open_other_post") ?>',
   themeLight: '<?= Language::getText("theme_light") ?>',
   themeDark: '<?= Language::getText("theme_dark") ?>',
   showPreview: '<?= Language::getText("show_preview") ?>',
@@ -1639,6 +1647,123 @@ function copyUrl() {
     btn.textContent = originalText;
   }, 2000);
 }
+
+/**
+ * Validate form before submission - check for duplicate names
+ */
+function validateForm() {
+  const nameInput = document.querySelector('input[name="name"]');
+  const postIdInput = document.querySelector('input[name="post_id"]');
+  const allNamesInput = document.getElementById('all-post-names');
+  
+  if (!nameInput || !allNamesInput) return true;
+  
+  const name = nameInput.value.trim();
+  if (name === '') return true;
+  
+  // Sanitize name like PHP does
+  const sanitized = name.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+  if (sanitized === '') return true;
+  
+  const currentPostId = parseInt(postIdInput.value) || 0;
+  const jsonData = allNamesInput.value;
+  
+  let allPostNames = [];
+  try {
+    if (jsonData && jsonData.trim() !== '') {
+      allPostNames = JSON.parse(jsonData);
+    }
+  } catch(e) {
+    return true; // On error, allow submission
+  }
+  
+  // Check if name already exists in another post
+  const duplicate = allPostNames.find(p => p.name === sanitized && p.id !== currentPostId);
+  
+  if (duplicate) {
+    showDuplicateNameDialog(sanitized, duplicate.id, duplicate.title);
+    nameInput.focus();
+    nameInput.select();
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Show custom dialog for duplicate name
+ */
+function showDuplicateNameDialog(name, postId, postTitle) {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+  
+  // Create dialog
+  const dialog = document.createElement('div');
+  dialog.style.cssText = 'background:white;padding:24px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:500px;width:90%;font-family:sans-serif;';
+  
+  dialog.innerHTML = `
+    <div style="display:flex;align-items:center;margin-bottom:16px;">
+      <span style="font-size:32px;margin-right:12px;">⚠️</span>
+      <h3 style="margin:0;font-size:18px;color:#721c24;">${TRANSLATIONS.duplicateNameTitle}</h3>
+    </div>
+    <p style="margin:0 0 16px 0;line-height:1.5;color:#333;">
+      ${TRANSLATIONS.duplicateNameIntro.replace('{name}', name)}
+    </p>
+    <div style="background:#f8f9fa;padding:12px;border-radius:4px;border-left:3px solid #007bff;margin-bottom:20px;">
+      <div style="font-size:12px;color:#666;margin-bottom:4px;">${TRANSLATIONS.postId} ${postId}</div>
+      <div style="font-weight:500;color:#333;">${postTitle || TRANSLATIONS.noTitle}</div>
+    </div>
+    <p style="margin:0 0 20px 0;color:#666;font-size:14px;">
+      ${TRANSLATIONS.duplicateNameFooter}
+    </p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="window.open('admin.php?action=editor&id=${postId}', '_blank')" style="padding:8px 16px;background:#6c757d;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;">
+        📝 ${TRANSLATIONS.openOtherPost}
+      </button>
+      <button id="close-duplicate-dialog" style="padding:8px 16px;background:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;">
+        OK
+      </button>
+    </div>
+  `;
+  
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+  
+  // Close on button click
+  document.getElementById('close-duplicate-dialog').onclick = () => {
+    document.body.removeChild(overlay);
+  };
+  
+  // Close on overlay click
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      document.body.removeChild(overlay);
+    }
+  };
+  
+  // Close on Escape key
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape' && document.body.contains(overlay)) {
+      document.body.removeChild(overlay);
+      document.removeEventListener('keydown', escapeHandler);
+    }
+  };
+  document.addEventListener('keydown', escapeHandler);
+}
+
+// Attach form validation
+(function() {
+  const editorForm = document.getElementById('editor-form');
+  if (editorForm) {
+    editorForm.addEventListener('submit', function(e) {
+      if (!validateForm()) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  }
+})();
 
 // Initialize token section visibility on page load
 document.addEventListener('DOMContentLoaded', function() {

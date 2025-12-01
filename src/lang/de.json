@@ -205,6 +205,15 @@
     "setup_copy_instructions": "Kopiere diese Zeilen in die Datei <code>src/Config.php</code>:",
     "setup_replace_instructions": "Lösche diese Zeilen:",
     "setup_after_save": "Nach dem Speichern kannst du dich mit deinem Benutzernamen und Passwort einloggen.",
-    "name_field_hint": "Nur a-z, 0-9 und Bindestrich erlaubt. Erlaubt URLs wie: ?name=mein-artikel",
-    "view_via_name": "Ansehen via Name"
+  "name_field_hint": "Nur a-z, 0-9 und Bindestrich erlaubt. Erlaubt URLs wie: ?name=mein-artikel",
+  "name_placeholder": "z. B. mein-artikel",
+  "view_via_name": "Ansehen via Name",
+  "duplicate_name_alert": "Dieser Name \"{name}\" wird bereits von einem anderen Artikel verwendet. Bitte wähle einen anderen Namen.",
+  "duplicate_name_title": "Name bereits vergeben",
+  "duplicate_name_intro": "Der Name <strong style=\"color:#007bff;\">&quot;{name}&quot;</strong> wird bereits verwendet:",
+  "duplicate_name_footer": "Bitte wähle einen anderen Namen oder bearbeite den anderen Beitrag.",
+  "no_title": "(Ohne Titel)",
+  "open_other_post": "Anderen Beitrag öffnen",
+  "name": "Name",
+  "used_by": "Verwendet von"
 }

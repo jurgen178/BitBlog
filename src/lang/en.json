@@ -205,6 +205,15 @@
     "setup_copy_instructions": "Copy these lines into the file <code>src/Config.php</code>:",
     "setup_replace_instructions": "Remove these lines:",
     "setup_after_save": "After saving, you can log in with your username and password.",
-    "name_field_hint": "Only a-z, 0-9 and hyphens allowed. Allows URLs like: ?name=my-article",
-    "view_via_name": "View via name"
+  "name_field_hint": "Only a-z, 0-9 and hyphens allowed. Allows URLs like: ?name=my-article",
+  "name_placeholder": "e.g. my-article",
+  "view_via_name": "View via name",
+  "duplicate_name_alert": "This name \"{name}\" is already used by another post. Please choose a different name.",
+  "duplicate_name_title": "Name already in use",
+  "duplicate_name_intro": "The name <strong style=\"color:#007bff;\">&quot;{name}&quot;</strong> is already used:",
+  "duplicate_name_footer": "Please choose a different name or edit the other post.",
+  "no_title": "(No Title)",
+  "open_other_post": "Open other post",
+  "name": "Name",
+  "used_by": "Used by"
 }

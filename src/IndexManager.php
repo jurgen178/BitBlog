@@ -276,6 +276,12 @@ final class IndexManager
         if (empty($name)) return null;
         
         // Search index for matching name
+        // PERFORMANCE NOTE: This is O(n) linear search through all posts.
+        // For blogs with < 1000 posts, this is fast enough (~0.1ms).
+        // For very large blogs (> 10,000 posts), consider optimizing with:
+        //   $nameToIdMap = array_column($index, 'id', 'name');
+        //   $postId = $nameToIdMap[$name] ?? null;
+        // This would be O(1) but requires building the lookup array once.
         $index = $this->getIndex();
         
         $postMeta = null;

@@ -33,7 +33,7 @@ Get-ChildItem -Recurse -Filter '*.php' -File | ForEach-Object {
         }
     }
     
-    # 2. Finde alle 'label' => 'key' Einträge in Arrays (z.B. CONFIGURABLE_SETTINGS)
+    # 2. Finde alle 'label' => 'key' Einträge in Arrays (z. B. CONFIGURABLE_SETTINGS)
     # Pattern: 'label' => 'sprachschlüssel'
     [regex]::Matches($content, "['`"]label['`"]\s*=>\s*['`"]([a-z_]+)['`"]") | ForEach-Object {
         $key = $_.Groups[1].Value
