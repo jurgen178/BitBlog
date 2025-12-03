@@ -177,6 +177,11 @@ button:hover {
   color: #fff;
 }
 
+.table td:last-child a.view-by-name {
+  background: #20c997;
+  color: #fff;
+}
+
 .table td:last-child a[href*="delete"] {
   background: #dc3545;
   color: #fff !important;

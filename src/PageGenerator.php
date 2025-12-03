@@ -195,6 +195,9 @@ final class PageGenerator
         .post-link:hover {
             text-decoration: underline;
         }
+        .post-link-name {
+            color: #25b4c7ff;
+        }
         .back-link {
             display: inline-block;
             color: #000;
@@ -231,7 +234,7 @@ final class PageGenerator
                             echo $date->format('d.m.Y');
 ?>)</a>
 <?php if (isset($post['name']) && $post['name'] !== ''): ?>
-                        <a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-link">📄<?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+                        <a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-link post-link-name"><?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
 <?php endif; ?>
                     </li>
 <?php endforeach; ?>
@@ -320,6 +323,9 @@ final class PageGenerator
         .post-title:hover {
             text-decoration: underline;
         }
+        .post-title-name {
+            color: #25b4c7ff;
+        }
         .post-date {
             white-space: nowrap;
             color: #666;
@@ -392,7 +398,7 @@ final class PageGenerator
                     }
 ?>" class="post-title" <?= $isEdit ? 'target="_blank" rel="noopener"' : '' ?>><?= htmlspecialchars($post['title']) ?></a>
 <?php if (isset($post['name']) && $post['name'] !== ''): ?>
-<br><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-title">📄<?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+<br><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-title post-title-name"><?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
 <?php endif; ?>
 </td>
                     <td class="post-categories">

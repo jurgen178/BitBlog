@@ -317,7 +317,7 @@ switch ($action) {
           <a href="index.php?id=<?= $p['id'] ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
 <?php endif; ?>
 <?php if (isset($p['name']) && $p['name'] !== ''): ?>
-          <a href="index.php?name=<?= urlencode($p['name']) ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" title="<?= Language::getText('view_via_name') ?>: <?= htmlspecialchars($p['name']) ?>">📄</a>
+          <a href="index.php?name=<?= urlencode($p['name']) ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" title="<?= Language::getText('view_via_name') ?>: <?= htmlspecialchars($p['name']) ?>" class="view-by-name">📄</a>
 <?php endif; ?>
           <a href="admin.php?action=delete&id=<?= $p['id'] ?>" class="post-delete-link" title="<?= Language::getText('delete') ?>">🗑️</a>
         </td>
