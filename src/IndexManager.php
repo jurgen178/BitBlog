@@ -99,7 +99,12 @@ final class IndexManager
                 $readingTime = max(1, min(90, (int)ceil($wordCount / 200))); // 200 words per minute, max 90 min
             }
             
-            $url = $this->baseUrl . '/index.php?id=' . $id;
+            // Use name for URL if available, otherwise use ID
+            if ($name !== null) {
+                $url = $this->baseUrl . '/index.php?name=' . urlencode($name);
+            } else {
+                $url = $this->baseUrl . '/index.php?id=' . $id;
+            }
 
             $postData = [
                 'id' => $id,

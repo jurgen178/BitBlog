@@ -227,14 +227,14 @@ final class PageGenerator
                         <a href="<?php if ($isEdit) {
                             echo htmlspecialchars($this->baseUrl) . '/admin.php?action=editor&id=' . $post['id'];
                         } else {
-                            echo htmlspecialchars($post['url']);
+                            echo htmlspecialchars($this->baseUrl) . '/index.php?id=' . $post['id'];
                         }
 ?>" class="post-link" <?= $isEdit ? 'target="_blank" rel="noopener"' : '' ?>><?= htmlspecialchars($post['title']) ?> (<?php
                             $date = new \DateTime('@' . $post['timestamp']);
                             echo $date->format('d.m.Y');
 ?>)</a>
 <?php if (isset($post['name']) && $post['name'] !== ''): ?>
-                        <a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-link post-link-name"><?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+                        <a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-link post-link-name"><?= htmlspecialchars($post['title']) ?> (name=<?= htmlspecialchars($post['name']) ?>)</a>
 <?php endif; ?>
                     </li>
 <?php endforeach; ?>
@@ -394,11 +394,11 @@ final class PageGenerator
                     <td><a href="<?php if ($isEdit) {
                         echo htmlspecialchars($this->baseUrl) . '/admin.php?action=editor&id=' . $post['id'];
                     } else {
-                        echo htmlspecialchars($post['url']);
+                        echo htmlspecialchars($this->baseUrl) . '/index.php?id=' . $post['id'];
                     }
 ?>" class="post-title" <?= $isEdit ? 'target="_blank" rel="noopener"' : '' ?>><?= htmlspecialchars($post['title']) ?></a>
 <?php if (isset($post['name']) && $post['name'] !== ''): ?>
-<br><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-title post-title-name"><?= htmlspecialchars($post['title']) ?>?name=<?= htmlspecialchars($post['name']) ?></a>
+<br><a href="<?= htmlspecialchars($this->baseUrl) ?>/index.php?name=<?= urlencode($post['name']) ?>" class="post-title post-title-name"><?= htmlspecialchars($post['title']) ?> (name=<?= htmlspecialchars($post['name']) ?>)</a>
 <?php endif; ?>
 </td>
                     <td class="post-categories">

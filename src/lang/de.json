@@ -207,7 +207,7 @@
     "setup_after_save": "Nach dem Speichern kannst du dich mit deinem Benutzernamen und Passwort einloggen.",
   "name_field_hint": "Nur a-z, 0-9 und Bindestrich erlaubt. Erlaubt URLs wie: ?name=mein-artikel",
   "name_placeholder": "z. B. mein-artikel",
-  "view_via_name": "Ansehen via Name",
+  "view_via_name": "Anzeigen via Name",
   "duplicate_name_alert": "Dieser Name \"{name}\" wird bereits von einem anderen Artikel verwendet. Bitte wähle einen anderen Namen.",
   "duplicate_name_title": "Name bereits vergeben",
   "duplicate_name_intro": "Der Name <strong style=\"color:#007bff;\">&quot;{name}&quot;</strong> wird bereits verwendet:",
