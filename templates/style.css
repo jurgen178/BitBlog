@@ -114,6 +114,11 @@ img.blog {
   box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
 }
 
+/* Links with blog images (Panoramas) */
+a:has(img.blog) {
+  font-size: 1.15em;
+}
+
 /* Pagination */
 .pagination {
   display: grid;
