@@ -111,6 +111,7 @@
     "status_published": "Published",
     "status_draft": "Draft",
     "status_private": "Private",
+    "status_idea": "Idea",
     "status_all": "All",
     
     "copy": "Copy",

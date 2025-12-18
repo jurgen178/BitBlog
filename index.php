@@ -87,7 +87,8 @@ switch ($route['name']) {
             break;
         }
         
-        // Published and Draft posts - always accessible
+        // Published and Draft posts - always accessible via name
+        // Idea posts are NOT accessible via name (they keep name for re-publishing)
         if ($post['status'] === Constants::POST_STATUS_PUBLISHED || $post['status'] === Constants::POST_STATUS_DRAFT) {
             echo $renderer->render('post', ['post' => $post, 'tags' => $content->getTagCloud()]);
             break;
@@ -110,8 +111,19 @@ switch ($route['name']) {
         break;
 
     case Constants::ROUTE_POST:
-        $id = $route['params']['id'];
-        $post = $content->getPostById($id);
+        // Support both id and file parameter (file for idea posts with ID=0)
+        if (!empty($route['params']['file'])) {
+            $filename = $route['params']['file'];
+            if (!str_ends_with($filename, '.md')) {
+                http_response_code(404);
+                echo $renderer->render('page', ['title' => Language::getText('not_found'), 'html' => '<p>' . Language::getText('post_not_found') . '</p>']);
+                break;
+            }
+            $post = $content->getPostByFilename($filename);
+        } else {
+            $id = $route['params']['id'];
+            $post = $content->getPostById($id);
+        }
         
         // Check if post exists and handle status-based access control
         if (!$post) {
@@ -120,8 +132,8 @@ switch ($route['name']) {
             break;
         }
         
-        // Published and Draft posts - always accessible
-        if ($post['status'] === Constants::POST_STATUS_PUBLISHED || $post['status'] === Constants::POST_STATUS_DRAFT) {
+        // Published, Draft, and Idea posts - always accessible (idea posts only via direct link)
+        if ($post['status'] === Constants::POST_STATUS_PUBLISHED || $post['status'] === Constants::POST_STATUS_DRAFT || $post['status'] === Constants::POST_STATUS_IDEA) {
             echo $renderer->render('post', ['post' => $post, 'tags' => $content->getTagCloud()]);
             break;
         }

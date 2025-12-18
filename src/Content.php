@@ -94,6 +94,11 @@ final class Content
         return $this->getIndexManager()->getPostByName($name);
     }
     
+    public function getPostByFilename(string $filename): ?array
+    {
+        return $this->getIndexManager()->getPostByFilename($filename);
+    }
+    
     private function loadHtmlForPosts(array $posts): array
     {
         // SIMPLE: Direct file loading without complex caching

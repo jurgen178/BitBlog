@@ -42,43 +42,65 @@ $editPostId = null;
 $editError = null;
 
 // Check for invalid URL parameters first
-$invalidParams = array_diff_key($_GET, array_flip(['action', 'id', 'id_post']));
+$invalidParams = array_diff_key($_GET, array_flip(['action', 'id', 'id_post', 'file']));
 if (!empty($invalidParams)) {
     $editError = 'invalid_parameters';
 }
 
-if (!empty($_GET['id']) || !empty($_GET['id_post'])) {
+// Handle edit mode - support id, id_post, or file parameter
+if (!empty($_GET['id']) || !empty($_GET['id_post']) || !empty($_GET['file'])) {
     $mode = 'edit';
-    $editPostId = (int)($_GET['id'] ?? $_GET['id_post']);
     
-    if ($editPostId <= 0) {
-        $editError = 'invalid_post_id';
-    } else {
-        $post = $content->getPostById($editPostId);
-        if ($post) {
-            // Load original markdown content (not HTML)
-            $raw = Utils::readFile($post['path']);
-            $parsed = $content->readMarkdownWithMeta($post['path'], $raw);
-            
-            // Use YAML meta + timestamp from index (filename is source of truth for date)
-            $meta = $parsed['meta'];
-            $meta['timestamp'] = $post['timestamp'];
-            
-            $body = $parsed['body'];
-            $original_path = $post['path'];
-            
-            // Calculate reading time from body content (for data-auto-value)
-            // This is ALWAYS calculated, even if manual override exists in YAML
-            $html = \BitBlog\RenderMarkdown::toHtml($body);
-            $textOnly = preg_replace('/<[^>]*>/', ' ', $html);
-            $textOnly = html_entity_decode($textOnly, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $textOnly = preg_replace('/\s+/', ' ', $textOnly);
-            $textOnly = trim($textOnly);
-            $wordCount = str_word_count($textOnly);
-            $autoCalculatedReadingTime = max(1, (int)ceil($wordCount / 200));
+    // For idea posts (ID=0), use filename instead of ID
+    if (!empty($_GET['file'])) {
+        $filename = $_GET['file'];
+        
+        if (!str_ends_with($filename, '.md')) {
+            $editError = 'invalid_post_id';
         } else {
-            $editError = 'post_not_found';
+            // Load post by filename (for idea posts with ID=0)
+            $post = $content->getPostByFilename($filename);
+            
+            if ($post) {
+                $editPostId = $post['id'];
+            } else {
+                $editError = 'post_not_found';
+            }
         }
+    } else {
+        $editPostId = (int)($_GET['id'] ?? $_GET['id_post']);
+        
+        // Allow ID=0 for idea posts
+        if ($editPostId < 0) {
+            $editError = 'invalid_post_id';
+        } else {
+            $post = $content->getPostById($editPostId);
+        }
+    }
+    
+    if (isset($post) && $post) {
+        // Load original markdown content (not HTML)
+        $raw = Utils::readFile($post['path']);
+        $parsed = $content->readMarkdownWithMeta($post['path'], $raw);
+        
+        // Use YAML meta + timestamp from index (filename is source of truth for date)
+        $meta = $parsed['meta'];
+        $meta['timestamp'] = $post['timestamp'];
+        
+        $body = $parsed['body'];
+        $original_path = $post['path'];
+        
+        // Calculate reading time from body content (for data-auto-value)
+        // This is ALWAYS calculated, even if manual override exists in YAML
+        $html = \BitBlog\RenderMarkdown::toHtml($body);
+        $textOnly = preg_replace('/<[^>]*>/', ' ', $html);
+        $textOnly = html_entity_decode($textOnly, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $textOnly = preg_replace('/\s+/', ' ', $textOnly);
+        $textOnly = trim($textOnly);
+        $wordCount = str_word_count($textOnly);
+        $autoCalculatedReadingTime = max(1, (int)ceil($wordCount / 200));
+    } elseif (!$editError) {
+        $editError = 'post_not_found';
     }
 }
 
@@ -145,11 +167,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // Load existing token if editing
+        // Load existing token and check for status changes
         $existingToken = null;
+        $previousStatus = null;
         if ($post_id > 0 && $original_path && file_exists($original_path)) {
             $parsed = $content->readMarkdownWithMeta($original_path);
             $existingToken = $parsed['meta']['token'] ?? null;
+            $previousStatus = $parsed['meta']['status'] ?? null;
         }
         
         // Generate token for private posts if not exists
@@ -206,10 +230,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $destDir = Config::CONTENT_DIR . '/posts';
     
+    // Helper function to find next available post ID
+    $getNextPostId = function() use ($destDir) {
+        $maxId = 0;
+        $rii = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($destDir, \FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($rii as $file) {
+            if ($file->isFile() && strtolower($file->getExtension()) === Constants::MARKDOWN_EXTENSION) {
+                $filename = basename($file->getPathname(), '.md');
+                // Format: YYYY-MM-DDTHHMM.ID.md
+                if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{4}\.(\d+)$/', $filename, $matches)) {
+                    $maxId = max($maxId, (int)$matches[1]);
+                }
+            }
+        }
+        return $maxId + 1;
+    };
+    
     // Determine destination and ID
     if ($post_id > 0 && $original_path) {
-      // Editing existing post - determine if user REALLY changed the date field
+      // Editing existing post
       $id = $post_id;
+      
+      // Check for status transitions involving idea status
+      $statusChangedToIdea = ($status === Constants::POST_STATUS_IDEA && $previousStatus !== Constants::POST_STATUS_IDEA);
+      $statusChangedFromIdea = ($status !== Constants::POST_STATUS_IDEA && $previousStatus === Constants::POST_STATUS_IDEA);
+      
+      // If changing TO idea status, set ID to 0
+      if ($statusChangedToIdea) {
+        $id = 0;
+      }
+      // If changing FROM idea status, generate new ID
+      elseif ($statusChangedFromIdea) {
+        $id = $getNextPostId();
+      }
 
       $oldFilename = basename($original_path, '.md');
       $oldDateInput = null; // format Y-m-dTH:i (local time)
@@ -232,32 +287,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $effectiveOriginalInput = $original_date_input !== '' ? $original_date_input : ($oldDateInput ?? '');
       $dateChanged = ($effectiveOriginalInput !== '' && $currentDateInput !== '' && $currentDateInput !== $effectiveOriginalInput);
 
-      if (!$dateChanged) {
-        // Date not changed by user -> keep original filename
+      if (!$dateChanged && !$statusChangedToIdea && !$statusChangedFromIdea) {
+        // Date not changed and no status transition -> keep original filename
         $dest = $original_path;
       } else {
-        // User changed date -> convert local time to UTC for filename
+        // User changed date OR status transition -> create new filename with updated ID
         $ts = strtotime($date) ?: time();
         $datePrefix = gmdate('Y-m-d', $ts);
         $timeStr = gmdate('Hi', $ts);
         $dest = $destDir . '/' . $datePrefix . 'T' . $timeStr . '.' . $id . '.md';
       }
     } else {
-        // New post - generate new ID and filename
-        $maxId = 0;
-        $rii = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($destDir, \FilesystemIterator::SKIP_DOTS)
-        );
-        foreach ($rii as $file) {
-            if ($file->isFile() && strtolower($file->getExtension()) === Constants::MARKDOWN_EXTENSION) {
-                $filename = basename($file->getPathname(), '.md');
-                // Format: YYYY-MM-DDTHHMM.ID.md
-                if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{4}\.(\d+)$/', $filename, $matches)) {
-                    $maxId = max($maxId, (int)$matches[1]);
-                }
-            }
+        // New post - check if it's an idea (ID=0) or regular post (next available ID)
+        if ($status === Constants::POST_STATUS_IDEA) {
+            $id = 0;
+        } else {
+            $id = $getNextPostId();
         }
-        $id = $maxId + 1;
         
         // Create new filename from date field: YYYY-MM-DDTHHMM.ID.md (convert local to UTC)
         $ts = strtotime($date) ?: time();
@@ -361,6 +407,9 @@ body {
   padding: 10px;
   flex: 1;
   overflow-y: auto;
+  /* Prevent the browser from auto-adjusting scroll position when content changes.
+     This is a common cause of "jumping" during innerHTML updates. */
+  overflow-anchor: none;
 }
 
 #editor-container #preview-pane.hidden-simple {
@@ -792,6 +841,7 @@ img {
           <option value="<?= Constants::POST_STATUS_DRAFT ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_DRAFT)?'selected':'' ?>><?= Language::getText('status_draft') ?></option>
           <option value="<?= Constants::POST_STATUS_PUBLISHED ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_PUBLISHED)?'selected':'' ?>><?= Language::getText('status_published') ?></option>
           <option value="<?= Constants::POST_STATUS_PRIVATE ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_PRIVATE)?'selected':'' ?>><?= Language::getText('status_private') ?></option>
+          <option value="<?= Constants::POST_STATUS_IDEA ?>" <?= (($meta['status'] ?? Constants::DEFAULT_POST_STATUS)===Constants::POST_STATUS_IDEA)?'selected':'' ?>>💡 <?= Language::getText('status_idea') ?></option>
         </select>
       </div>
     </div>
@@ -977,6 +1027,9 @@ function confirmRegenerate() {
 let monacoEditor = null;
 let scrollSyncEnabled = true;
 
+// Cancel in-flight preview request (fast typing can overlap requests)
+let previewAbortController = null;
+
 /* ==========================================================================
    Visual Studio Code EDITOR INITIALIZATION
    ========================================================================== */
@@ -1022,13 +1075,15 @@ require(['vs/editor/editor.main'], function() {
   // Sync editor content with form textarea
   monacoEditor.onDidChangeModelContent(() => {
     document.getElementById('editor').value = monacoEditor.getValue();
+
+    // Typing must never trigger scroll syncing.
+    // We only sync when the user explicitly scrolls either pane.
+    scrollLeader = null;
     updatePreview();
   });
   
-  // Add synchronized scrolling
-  monacoEditor.onDidScrollChange(() => {
-    syncScrollToPreview();
-  });
+  // Add synchronized scrolling (simple & deterministic)
+  initSimpleScrollSync();
   
   // Register keyboard shortcuts
   monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB, () => insertMarkdown('**', '**'));
@@ -1054,6 +1109,7 @@ function updatePreview() {
   if (!monacoEditor) return;
   const markdown = monacoEditor.getValue();
   const previewContent = document.getElementById('preview-content');
+  if (!previewContent) return;
   
   // If editor is empty, show cue text
   if (!markdown.trim()) {
@@ -1061,18 +1117,55 @@ function updatePreview() {
     return;
   }
   
+  // Cancel any in-flight preview request (fast typing produces many).
+  if (previewAbortController) {
+    try { previewAbortController.abort(); } catch (_) {}
+  }
+  const controller = new AbortController();
+  previewAbortController = controller;
+
   fetch('<?= Config::BASE_URL() ?>/admin/preview.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `markdown=${encodeURIComponent(markdown)}`
+    body: `markdown=${encodeURIComponent(markdown)}`,
+    signal: controller.signal
   })
   .then(r => r.json())
   .then(data => {
+    // Ignore stale/out-of-order responses.
+    if (previewAbortController !== controller) return;
+
+    // Preserve preview scroll position at the time we apply the render.
+    // Capturing it here avoids "jump back" if the user scrolled during fetch.
+    const oldScrollTop = previewContent.scrollTop;
+    const oldScrollLeft = previewContent.scrollLeft;
+
     previewContent.innerHTML = data.success ? data.html : '<em>' + TRANSLATIONS.error + '</em>';
+
+    // Restore scrollTop (clamped by browser if needed)
+    if (Math.abs(previewContent.scrollTop - oldScrollTop) > 1) {
+      // Do not let this programmatic scroll restore trigger sync.
+      ignoreNextPreviewScroll = Math.max(ignoreNextPreviewScroll, 1);
+      previewContent.scrollTop = oldScrollTop;
+    }
+
+    if (Math.abs(previewContent.scrollLeft - oldScrollLeft) > 1) {
+      previewContent.scrollLeft = oldScrollLeft;
+    }
+
+    // After the first successful render, ensure preview reflects the current
+    // editor scroll position (unless the user is currently driving the preview).
+    if (initialEditorToPreviewSyncPending && scrollLeader !== 'preview') {
+      initialEditorToPreviewSyncPending = false;
+      syncPreviewToEditorScroll();
+    }
+
     // Setup preview scroll sync after content update
     setupPreviewScrollSync();
   })
   .catch(err => {
+    if (previewAbortController !== controller) return;
+    if (err && (err.name === 'AbortError' || err.code === 20)) return;
     console.error('Preview fetch error:', err);
     previewContent.innerHTML = '<em>' + TRANSLATIONS.error + ': ' + err.message + '</em>';
   });
@@ -1082,80 +1175,139 @@ function updatePreview() {
    SYNCHRONIZED SCROLLING SYSTEM
    ========================================================================== */
 
-let isScrollSyncing = false;
+// Simple rules:
+// - Sync only on user scroll (never on typing).
+// - Prevent feedback loops with a one-shot ignore counter.
 
-/**
- * Sync editor scroll position to preview
- */
-function syncScrollToPreview() {
-  if (!monacoEditor || isScrollSyncing || !scrollSyncEnabled) return;
-  
+// Which pane is currently the user-driven scroll source.
+// Set ONLY by explicit user input events (wheel/touch/pointer/scrollbar drag).
+// Never set by programmatic scroll changes.
+let scrollLeader = null; // 'editor' | 'preview' | null
+
+let ignoreNextPreviewScroll = 0;
+let ignoreNextEditorScroll = 0;
+
+let previewScrollSyncInitialized = false;
+
+let editorPointerActive = false;   // while dragging editor scrollbar
+
+// One-time: after the first preview render, align preview scroll to the editor.
+// This avoids the "preview doesn't match editor at start" problem.
+let initialEditorToPreviewSyncPending = true;
+
+function isPreviewVisibleForSync() {
+  const previewPane = document.getElementById('preview-pane');
+  return !!(previewPane && !previewPane.classList.contains('hidden-simple'));
+}
+
+function syncPreviewToEditorScroll() {
+  if (!monacoEditor || !scrollSyncEnabled) return;
+  if (!isPreviewVisibleForSync()) return;
   const previewContent = document.getElementById('preview-content');
   if (!previewContent) return;
-  
-  isScrollSyncing = true;
-  
-  // Get editor scroll info
+
   const scrollTop = monacoEditor.getScrollTop();
   const scrollHeight = monacoEditor.getScrollHeight();
   const visibleHeight = monacoEditor.getLayoutInfo().height;
-  
-  // Calculate scroll percentage
   const maxScroll = scrollHeight - visibleHeight;
-  const scrollPercentage = maxScroll > 0 ? scrollTop / maxScroll : 0;
-  
-  // Apply to preview
+  const pct = maxScroll > 0 ? (scrollTop / maxScroll) : 0;
+
   const previewMaxScroll = previewContent.scrollHeight - previewContent.clientHeight;
-  const previewScrollTop = previewMaxScroll * scrollPercentage;
-  
-  previewContent.scrollTop = previewScrollTop;
-  
-  setTimeout(() => { isScrollSyncing = false; }, 50);
+  const desired = previewMaxScroll * pct;
+
+  if (Math.abs(previewContent.scrollTop - desired) > 1) {
+    ignoreNextPreviewScroll = 1;
+    previewContent.scrollTop = desired;
+  }
 }
 
-/**
- * Setup preview to editor scroll sync
- */
-function setupPreviewScrollSync() {
-  const previewContent = document.getElementById('preview-content');
-  if (!previewContent) return;
-  
-  // Remove existing listener to avoid duplicates
-  previewContent.removeEventListener('scroll', syncScrollToEditor);
-  
-  // Add new listener
-  previewContent.addEventListener('scroll', syncScrollToEditor);
-}
+function syncEditorToPreviewScroll(previewContent) {
+  if (!monacoEditor || !scrollSyncEnabled) return;
+  if (!isPreviewVisibleForSync()) return;
 
-/**
- * Sync preview scroll position to editor
- */
-function syncScrollToEditor() {
-  if (!monacoEditor || isScrollSyncing || !scrollSyncEnabled) return;
-  
-  const previewContent = document.getElementById('preview-content');
-  if (!previewContent) return;
-  
-  isScrollSyncing = true;
-  
-  // Get preview scroll info
-  const previewScrollTop = previewContent.scrollTop;
-  const previewScrollHeight = previewContent.scrollHeight;
-  const previewVisibleHeight = previewContent.clientHeight;
-  
-  // Calculate scroll percentage
-  const previewMaxScroll = previewScrollHeight - previewVisibleHeight;
-  const scrollPercentage = previewMaxScroll > 0 ? previewScrollTop / previewMaxScroll : 0;
-  
-  // Apply to editor
+  const previewMaxScroll = previewContent.scrollHeight - previewContent.clientHeight;
+  const pct = previewMaxScroll > 0 ? (previewContent.scrollTop / previewMaxScroll) : 0;
+
   const editorScrollHeight = monacoEditor.getScrollHeight();
   const editorVisibleHeight = monacoEditor.getLayoutInfo().height;
   const editorMaxScroll = editorScrollHeight - editorVisibleHeight;
-  const editorScrollTop = editorMaxScroll * scrollPercentage;
-  
-  monacoEditor.setScrollTop(editorScrollTop);
-  
-  setTimeout(() => { isScrollSyncing = false; }, 50);
+  const desired = editorMaxScroll * pct;
+
+  if (Math.abs(monacoEditor.getScrollTop() - desired) > 1) {
+    ignoreNextEditorScroll = 1;
+    monacoEditor.setScrollTop(desired);
+  }
+}
+
+function initSimpleScrollSync() {
+  const editorDomNode = monacoEditor?.getDomNode();
+  if (!editorDomNode) return;
+
+  // Explicit user intent: editor is the driving scroll source.
+  editorDomNode.addEventListener('wheel', () => { scrollLeader = 'editor'; }, { passive: true, capture: true });
+  editorDomNode.addEventListener('touchstart', () => { scrollLeader = 'editor'; }, { passive: true, capture: true });
+  editorDomNode.addEventListener('touchmove', () => { scrollLeader = 'editor'; }, { passive: true, capture: true });
+  editorDomNode.addEventListener('keydown', (ev) => {
+    const k = ev.key;
+    if (k === 'PageDown' || k === 'PageUp' || k === 'Home' || k === 'End') {
+      scrollLeader = 'editor';
+    }
+  }, { capture: true });
+
+  // Scrollbar drag (best-effort): only treat pointerdown on Monaco scrollbars as scroll intent.
+  editorDomNode.addEventListener('pointerdown', (ev) => {
+    // Any pointer interaction inside the editor means the user is working here.
+    // If a scroll happens as a result (e.g. scrollbar drag), the editor should drive sync.
+    scrollLeader = 'editor';
+
+    const t = ev.target;
+    const isScrollbar = !!(t && t.closest && t.closest('.scrollbar'));
+    if (!isScrollbar) return;
+    editorPointerActive = true;
+    const stop = () => { editorPointerActive = false; };
+    document.addEventListener('pointerup', stop, { once: true, capture: true });
+    document.addEventListener('pointercancel', stop, { once: true, capture: true });
+  }, { passive: true, capture: true });
+
+  monacoEditor.onDidScrollChange((e) => {
+    if (!e || !e.scrollTopChanged) return;
+    if (ignoreNextEditorScroll > 0) {
+      ignoreNextEditorScroll = 0;
+      return;
+    }
+    if (!scrollSyncEnabled) return;
+    if (scrollLeader !== 'editor') return;
+    // For scrollbar drag, Monaco will emit many scroll events. Allow continuous syncing.
+    // For wheel/keys, this will also run, but only when user intent was set.
+    syncPreviewToEditorScroll();
+  });
+}
+
+function setupPreviewScrollSync() {
+  const previewContent = document.getElementById('preview-content');
+  if (!previewContent) return;
+  if (previewScrollSyncInitialized) return;
+  previewScrollSyncInitialized = true;
+
+  // Explicit user intent: preview is the driving scroll source.
+  const setPreviewLeader = () => { scrollLeader = 'preview'; };
+  previewContent.addEventListener('wheel', setPreviewLeader, { passive: true });
+  previewContent.addEventListener('pointerdown', setPreviewLeader, { passive: true });
+  previewContent.addEventListener('touchstart', setPreviewLeader, { passive: true });
+  previewContent.addEventListener('touchmove', setPreviewLeader, { passive: true });
+
+  previewContent.addEventListener('scroll', (e) => {
+    if (!scrollSyncEnabled) return;
+    if (!isPreviewVisibleForSync()) return;
+    if (ignoreNextPreviewScroll > 0) {
+      ignoreNextPreviewScroll = 0;
+      return;
+    }
+    // Only user scroll events (programmatic restore from preview render is ignored)
+    if (!e.isTrusted) return;
+    if (scrollLeader !== 'preview') return;
+    syncEditorToPreviewScroll(previewContent);
+  }, { passive: true });
 }
 
 /* ==========================================================================

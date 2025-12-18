@@ -9,6 +9,7 @@ final class Constants
     public const POST_STATUS_DRAFT = 'draft';
     public const POST_STATUS_PUBLISHED = 'published';
     public const POST_STATUS_PRIVATE = 'private';
+    public const POST_STATUS_IDEA = 'idea';
     
     // File extensions
     public const MARKDOWN_EXTENSION = 'md';

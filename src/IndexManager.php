@@ -79,6 +79,7 @@ final class IndexManager
             $filename = basename($path, '.md');
             $id = $this->markdownProcessor->extractIdFromFilename($filename);
             if ($id === null) continue; // Skip files that don't match the expected format
+            // Note: ID=0 (idea posts) are included in index but filtered in public views
             
             // Calculate reading time from content (or use manual override from meta)
             if (isset($meta['reading_time']) && is_numeric($meta['reading_time'])) {
@@ -178,8 +179,8 @@ final class IndexManager
         $searchIndex = [];
         
         foreach ($posts as $post) {
-            // Skip non-published posts in search index
-            if ($post['status'] !== Constants::POST_STATUS_PUBLISHED) {
+            // Skip non-published and idea posts (ID=0) in search index
+            if ($post['status'] !== Constants::POST_STATUS_PUBLISHED || $post['id'] === 0) {
                 continue;
             }
             
@@ -274,6 +275,50 @@ final class IndexManager
         return $result;
     }
 
+    public function getPostByFilename(string $filename): ?array
+    {
+        // Search for post by filename (useful for idea posts with ID=0)
+        $index = $this->getIndex();
+        
+        $postMeta = null;
+        foreach ($index as $post) {
+            if (basename($post['path']) === $filename) {
+                $postMeta = $post;
+                break;
+            }
+        }
+        
+        if (!$postMeta) return null;
+        
+        // Load the file content
+        $path = $postMeta['path'];
+        if (!is_file($path)) return null;
+        
+        $raw = Utils::readFile($path);
+        $parsed = $this->markdownProcessor->readMarkdownWithMeta($path, $raw);
+        $html = RenderMarkdown::toHtml($parsed['body']);
+        
+        $result = [
+            'id' => $postMeta['id'],
+            'title' => $postMeta['title'],
+            'timestamp' => $postMeta['timestamp'],
+            'status' => $postMeta['status'],
+            'tags' => $postMeta['tags'],
+            'path' => $path,
+            'url' => $postMeta['url'],
+            'html' => $html,
+            'meta' => $parsed['meta'],
+            'reading_time' => max(1, min(90, $postMeta['reading_time'] ?? 1)),
+        ];
+        
+        // Include token if it exists (for private posts)
+        if (isset($postMeta['token'])) {
+            $result['token'] = $postMeta['token'];
+        }
+        
+        return $result;
+    }
+
     public function getPostByName(string $name): ?array
     {
         // Sanitize input to match stored format
@@ -335,7 +380,9 @@ final class IndexManager
 
     public function getAllPostUrls(): array
     {
-        return array_map(fn($p) => $p['url'], $this->getIndex());
+        // Exclude idea posts (ID=0) from public URLs
+        $publicPosts = array_filter($this->getIndex(), fn($p) => $p['id'] !== 0);
+        return array_map(fn($p) => $p['url'], $publicPosts);
     }
 
     public function getTagCloud(): array
@@ -348,7 +395,8 @@ final class IndexManager
         $untaggedCount = 0;
         
         foreach ($this->getIndex() as $p) {
-            if ($p['status'] !== Constants::POST_STATUS_PUBLISHED) continue;
+            // Skip non-published and idea posts (ID=0)
+            if ($p['status'] !== Constants::POST_STATUS_PUBLISHED || $p['id'] === 0) continue;
             
             if (empty($p['tags'])) {
                 $untaggedCount++;
@@ -404,7 +452,8 @@ final class IndexManager
         }
         
         foreach ($this->getIndex() as $post) {
-            if ($post['status'] !== Constants::POST_STATUS_PUBLISHED) continue;
+            // Skip non-published and idea posts (ID=0)
+            if ($post['status'] !== Constants::POST_STATUS_PUBLISHED || $post['id'] === 0) continue;
             
             // Special case: uncategorized posts (empty tag or explicit "uncategorized")
             if (empty($tag) || $tagLower === 'uncategorized') {

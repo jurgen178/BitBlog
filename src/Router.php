@@ -19,6 +19,12 @@ final class Router
             return ['name' => Constants::ROUTE_POST_BY_NAME, 'params' => ['name' => $name, 'token' => $token]];
         }
         
+        // Check for file parameter (for idea posts with ID=0)
+        if (isset($_GET['file'])) {
+            $file = (string)$_GET['file'];
+            return ['name' => Constants::ROUTE_POST, 'params' => ['file' => $file]];
+        }
+        
         // Check for specific GET parameters
         if (isset($_GET['id']) || isset($_GET['id_post'])) {
             $id = (int)($_GET['id'] ?? $_GET['id_post']);

@@ -172,7 +172,8 @@ button:hover {
   color: #fff;
 }
 
-.table td:last-child a[href*="index.php?id"] {
+.table td:last-child a[href*="index.php?id"],
+.table td:last-child a[href*="index.php?file"] {
   background: #28a745;
   color: #fff;
 }

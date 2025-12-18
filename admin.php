@@ -185,6 +185,7 @@ switch ($action) {
             Constants::POST_STATUS_PUBLISHED => count(array_filter($allPosts, fn($p) => $p['status'] === Constants::POST_STATUS_PUBLISHED)),
             Constants::POST_STATUS_DRAFT => count(array_filter($allPosts, fn($p) => $p['status'] === Constants::POST_STATUS_DRAFT)),
             Constants::POST_STATUS_PRIVATE => count(array_filter($allPosts, fn($p) => $p['status'] === Constants::POST_STATUS_PRIVATE)),
+            Constants::POST_STATUS_IDEA => count(array_filter($allPosts, fn($p) => $p['status'] === Constants::POST_STATUS_IDEA)),
         ];
         
         // Apply status filter if provided
@@ -292,6 +293,7 @@ switch ($action) {
       <option value="<?= Constants::POST_STATUS_PUBLISHED ?>" <?= $statusFilter === Constants::POST_STATUS_PUBLISHED ? 'selected' : '' ?>><?= Language::getText('status_published') ?> (<?= $statusCounts[Constants::POST_STATUS_PUBLISHED] ?>)</option>
       <option value="<?= Constants::POST_STATUS_DRAFT ?>" <?= $statusFilter === Constants::POST_STATUS_DRAFT ? 'selected' : '' ?>><?= Language::getText('status_draft') ?> (<?= $statusCounts[Constants::POST_STATUS_DRAFT] ?>)</option>
       <option value="<?= Constants::POST_STATUS_PRIVATE ?>" <?= $statusFilter === Constants::POST_STATUS_PRIVATE ? 'selected' : '' ?>><?= Language::getText('status_private') ?> (<?= $statusCounts[Constants::POST_STATUS_PRIVATE] ?>)</option>
+      <option value="<?= Constants::POST_STATUS_IDEA ?>" <?= $statusFilter === Constants::POST_STATUS_IDEA ? 'selected' : '' ?>>💡 <?= Language::getText('status_idea') ?> (<?= $statusCounts[Constants::POST_STATUS_IDEA] ?>)</option>
     </select>
   </div>
   <table class="table">
@@ -299,19 +301,21 @@ switch ($action) {
     <tbody>
 <?php foreach ($posts as $p): ?>
       <tr>
-        <td><a href="index.php?id=<?= $p['id'] ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" class="post-id-link"><strong>#<?= $p['id'] ?></strong></a></td>
+        <td><?php if ($p['id'] === 0): ?><a href="index.php?file=<?= urlencode(basename($p['path'])) ?>" target="_blank" class="post-id-link"><strong>#<?= $p['id'] ?></strong></a><?php else: ?><a href="index.php?id=<?= $p['id'] ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" class="post-id-link"><strong>#<?= $p['id'] ?></strong></a><?php endif; ?></td>
         <td>
-          <a href="admin.php?action=editor&id=<?= $p['id'] ?>" class="post-title-link"><?= htmlspecialchars($p['title']) ?></a>
+          <a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-title-link"><?= htmlspecialchars($p['title']) ?></a>
         </td>
-        <td><a href="admin.php?action=editor&id=<?= $p['id'] ?>" class="post-date-link">📅 <?php
+        <td><a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-date-link">📅 <?php
           $dateFormatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE);
           $timeFormatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::NONE, IntlDateFormatter::SHORT);
           echo $dateFormatter->format($p['timestamp']) . ' · ' . $timeFormatter->format($p['timestamp']);
 ?></a></td>
-        <td><a href="admin.php?action=editor&id=<?= $p['id'] ?>" class="post-status-link"><?php if ($p['status'] === Constants::POST_STATUS_PRIVATE): ?>🔒 <?php endif; ?><?= htmlspecialchars(translateStatus($p['status'])) ?></a></td>
+        <td><a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-status-link"><?php if ($p['status'] === Constants::POST_STATUS_PRIVATE): ?>🔒 <?php elseif ($p['status'] === Constants::POST_STATUS_IDEA): ?>💡 <?php endif; ?><?= htmlspecialchars(translateStatus($p['status'])) ?></a></td>
         <td>
-          <a href="admin.php?action=editor&id=<?= $p['id'] ?>" title="<?= Language::getText('edit') ?>">✏️</a>
-<?php if ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])): ?>
+          <a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" title="<?= Language::getText('edit') ?>">✏️</a>
+<?php if ($p['id'] === 0): ?>
+          <a href="index.php?file=<?= urlencode(basename($p['path'])) ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
+<?php elseif ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])): ?>
           <a href="index.php?id=<?= $p['id'] ?>&token=<?= urlencode($p['token']) ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
 <?php else: ?>
           <a href="index.php?id=<?= $p['id'] ?>" target="_blank" title="<?= Language::getText('view') ?>">🔢</a>
@@ -319,7 +323,7 @@ switch ($action) {
 <?php if (isset($p['name']) && $p['name'] !== ''): ?>
           <a href="index.php?name=<?= urlencode($p['name']) ?><?= ($p['status'] === Constants::POST_STATUS_PRIVATE && isset($p['token'])) ? '&token=' . urlencode($p['token']) : '' ?>" target="_blank" title="<?= Language::getText('view_via_name') ?>: <?= htmlspecialchars($p['name']) ?>" class="view-by-name">📄</a>
 <?php endif; ?>
-          <a href="admin.php?action=delete&id=<?= $p['id'] ?>" class="post-delete-link" title="<?= Language::getText('delete') ?>">🗑️</a>
+          <a href="admin.php?action=delete&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-delete-link" title="<?= Language::getText('delete') ?>">🗑️</a>
         </td>
       </tr>
 <?php endforeach; ?>

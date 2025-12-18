@@ -6,21 +6,32 @@ use BitBlog\Config;
 use BitBlog\Language;
 
 // Check for invalid parameters first
-$invalidParams = array_diff_key($_GET, array_flip(['action', 'id', 'id_post', 'confirm']));
+$invalidParams = array_diff_key($_GET, array_flip(['action', 'id', 'id_post', 'file', 'confirm']));
 if (!empty($invalidParams)) {
     header('Location: admin.php?error=invalid_parameters');
     exit;
 }
 
-$postId = (int)($_GET['id'] ?? $_GET['id_post'] ?? 0);
-if ($postId === 0) {
-    header('Location: admin.php?error=invalid_id');
-    exit;
-}
-
 // Load content to find the post
 $content = new Content(Config::CONTENT_DIR, Config::CACHE_DIR, Config::BASE_URL());
-$post = $content->getPostById($postId);
+
+// Support both ID and filename (for idea posts with ID=0)
+if (!empty($_GET['file'])) {
+    $filename = $_GET['file'];
+    if (!str_ends_with($filename, '.md')) {
+        header('Location: admin.php?error=invalid_id');
+        exit;
+    }
+    $post = $content->getPostByFilename($filename);
+    $postId = $post ? $post['id'] : 0;
+} else {
+    $postId = (int)($_GET['id'] ?? $_GET['id_post'] ?? 0);
+    if ($postId < 0) {
+        header('Location: admin.php?error=invalid_id');
+        exit;
+    }
+    $post = $content->getPostById($postId);
+}
 
 if (!$post) {
     header('Location: admin.php?error=post_not_found');
@@ -61,7 +72,7 @@ if (!isset($_GET['confirm']) || $_GET['confirm'] !== '1') {
       <?= Language::getText('action_cannot_be_undone') ?>
     </p>
     <div class="delete-actions">
-      <a href="admin.php?action=delete&id=<?= $postId ?>&confirm=1" class="delete-btn">
+      <a href="admin.php?action=delete&<?= !empty($_GET['file']) ? 'file=' . urlencode($_GET['file']) : 'id=' . $postId ?>&confirm=1" class="delete-btn">
         🗑️ <?= Language::getText('yes_delete') ?>
       </a>
       <a href="admin.php" class="cancel-btn">

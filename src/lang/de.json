@@ -111,6 +111,7 @@
     "status_published": "Veröffentlicht",
     "status_draft": "Entwurf",
     "status_private": "Privat",
+    "status_idea": "Idee",
     "status_all": "Alle",
     
     "copy": "Kopieren",
