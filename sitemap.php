@@ -15,9 +15,13 @@ require __DIR__ . '/src/Language.php';
 use BitBlog\Config;
 use BitBlog\Constants;
 use BitBlog\Content;
+use BitBlog\Language;
 use BitBlog\Sitemap;
 
 date_default_timezone_set(Config::TIMEZONE);
+
+// Ensure consistent locale for IntlDateFormatter (independent of server defaults)
+\Locale::setDefault(Language::getLocale());
 
 // Set XML headers
 header('Content-Type: application/xml; charset=UTF-8');

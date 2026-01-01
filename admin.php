@@ -48,6 +48,9 @@ use BitBlog\Content;
 $timezone = Config::get('TIMEZONE');
 date_default_timezone_set($timezone);
 
+// Ensure consistent locale for IntlDateFormatter (independent of server defaults)
+\Locale::setDefault(Language::getLocale());
+
 // Translation function for status display
 function translateStatus(string $status): string {
     return Language::getText("status_$status");
@@ -306,8 +309,16 @@ switch ($action) {
           <a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-title-link"><?= htmlspecialchars($p['title']) ?></a>
         </td>
         <td><a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-date-link">📅 <?php
-          $dateFormatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE);
-          $timeFormatter = new IntlDateFormatter(Locale::getDefault(), IntlDateFormatter::NONE, IntlDateFormatter::SHORT);
+          // Date format options:
+          // - Current (LONG): e.g. "1. Januar 2026"
+          // - Month abbreviation: set a pattern, e.g. "1. Jan. 2026"
+          //     new IntlDateFormatter(Language::getLocale(), IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'd. MMM y')
+          // - Numeric date (locale-dependent): for de_DE, MEDIUM is typically "02.12.2025"
+          //     new IntlDateFormatter(Language::getLocale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE)
+          // - Numeric date (forced pattern): always exactly "dd.MM.y" (independent of locale quirks)
+          //     new IntlDateFormatter(Language::getLocale(), IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'dd.MM.y')
+          $dateFormatter = new IntlDateFormatter(Language::getLocale(), IntlDateFormatter::LONG, IntlDateFormatter::NONE);
+          $timeFormatter = new IntlDateFormatter(Language::getLocale(), IntlDateFormatter::NONE, IntlDateFormatter::SHORT);
           echo $dateFormatter->format($p['timestamp']) . ' · ' . $timeFormatter->format($p['timestamp']);
 ?></a></td>
         <td><a href="admin.php?action=editor&<?= $p['id'] === 0 ? 'file=' . urlencode(basename($p['path'])) : 'id=' . $p['id'] ?>" class="post-status-link"><?php if ($p['status'] === Constants::POST_STATUS_PRIVATE): ?>🔒 <?php elseif ($p['status'] === Constants::POST_STATUS_IDEA): ?>💡 <?php endif; ?><?= htmlspecialchars(translateStatus($p['status'])) ?></a></td>

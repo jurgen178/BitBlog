@@ -32,6 +32,9 @@ $timezone = Config::get('TIMEZONE');
 
 date_default_timezone_set($timezone);
 
+// Ensure consistent locale for IntlDateFormatter (independent of server defaults)
+\Locale::setDefault(Language::getLocale());
+
 $content = new Content(Config::CONTENT_DIR, Config::CACHE_DIR, Config::BASE_URL());
 $renderer = new Renderer(__DIR__ . '/templates', $siteTitle, Config::BASE_URL());
 

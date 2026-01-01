@@ -14,9 +14,13 @@ require __DIR__ . '/src/Language.php';
 
 use BitBlog\Config;
 use BitBlog\Content;
+use BitBlog\Language;
 use BitBlog\Rss;
 
 date_default_timezone_set(Config::TIMEZONE);
+
+// Ensure consistent locale for IntlDateFormatter (independent of server defaults)
+\Locale::setDefault(Language::getLocale());
 
 // Set RSS headers FIRST
 header('Content-Type: application/rss+xml; charset=UTF-8');
