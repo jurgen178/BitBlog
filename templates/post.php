@@ -2,6 +2,21 @@
 use BitBlog\Utils;
 use BitBlog\Language;
 $title = $post['title'];
+
+// Share URL should preserve how the post is accessed (e.g. ?name=...),
+// and also preserve an optional ?token= for private posts.
+$shareParams = [];
+if (!empty($_GET['file'])) {
+  $shareParams['file'] = (string)$_GET['file'];
+} elseif (!empty($_GET['name'])) {
+  $shareParams['name'] = (string)$_GET['name'];
+} else {
+  $shareParams['id'] = (string)$post['id'];
+}
+if (!empty($_GET['token'])) {
+  $shareParams['token'] = (string)$_GET['token'];
+}
+$shareUrl = $baseUrl . '/index.php?' . http_build_query($shareParams);
 ?>
 <article class="post">
   <header>
@@ -27,7 +42,7 @@ $title = $post['title'];
         <span>·</span>
         <span>⏱️ <?= Language::getTextf('reading_time', $post['reading_time']) ?></span>
       <?php endif; ?>
-      <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($baseUrl . '/index.php?id=' . $post['id']) ?>" data-title="<?= Utils::e($post['title']) ?>" data-copy-link-text="<?= Language::getText('copy_link') ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
+      <button class="share-button" onclick="sharePost(this)" data-url="<?= Utils::e($shareUrl) ?>" data-title="<?= Utils::e($post['title']) ?>" data-copy-link-text="<?= Language::getText('copy_link') ?>" title="<?= Language::getText('share_post') ?>" aria-label="<?= Language::getText('share_post') ?>">🔗</button>
     </div>
   </header>
   <br />
