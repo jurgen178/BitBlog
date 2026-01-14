@@ -336,6 +336,7 @@ All archives are managed in one table with three actions per archive:
 - **`published`**: Visible on the blog
 - **`draft`**: Hidden from public view
 - **`private`**: Accessible only via direct link
+- **`idea`**: Hidden from public view, accessible only via name link
 
 ## 📋 Requirements
 
@@ -349,10 +350,6 @@ All archives are managed in one table with three actions per archive:
 - Modify CSS in `/templates/style.css` for styling
 - Admin interface styles in `/admin/admin.css`
 
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [DEVELOPER_STANDARDS.md](DEVELOPER_STANDARDS.md) before submitting PRs.
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -363,5 +360,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**BitBlog** - Lightweight, secure, and fast!
+**BitBlog** - Lightweight, secure, and fast!  
+See live blog [https://www.bitfabrik.io/blog/](https://www.bitfabrik.io/blog/)
 
