@@ -622,15 +622,43 @@ class ParsedownExtra extends Parsedown
         # http://stackoverflow.com/q/1148928/200145
         libxml_use_internal_errors(true);
 
+        // DOMDocument::loadHTML assumes ISO-8859-1 unless the input declares UTF-8.
+        // That can corrupt non-ASCII characters (e.g. emoji) inside raw HTML tags.
         $DOMDocument = new DOMDocument;
+        $DOMDocument->encoding = 'UTF-8';
 
-        # http://stackoverflow.com/q/11309194/200145
+        // Encode markup to entities (ParsedownExtra's historical approach), but also
+        // prepend an XML encoding hint so libxml parses the remaining UTF-8 safely.
         $elementMarkup = htmlentities($elementMarkup, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $DOMDocument->loadHTML('<?xml encoding="UTF-8">' . $elementMarkup);
 
-        # http://stackoverflow.com/q/4879946/200145
-        $DOMDocument->loadHTML($elementMarkup);
-        $DOMDocument->removeChild($DOMDocument->doctype);
-        $DOMDocument->replaceChild($DOMDocument->firstChild->firstChild->firstChild, $DOMDocument->firstChild);
+        // The doctype may not always be present; guard to avoid warnings.
+        if ($DOMDocument->doctype)
+        {
+            $DOMDocument->removeChild($DOMDocument->doctype);
+        }
+
+        // Replace the generated <html> wrapper with the actual element node.
+        $htmlNode = $DOMDocument->getElementsByTagName('html')->item(0);
+        $bodyNode = $DOMDocument->getElementsByTagName('body')->item(0);
+
+        if ($htmlNode && $bodyNode)
+        {
+            $firstElement = null;
+            foreach ($bodyNode->childNodes as $child)
+            {
+                if ($child instanceof DOMElement)
+                {
+                    $firstElement = $child;
+                    break;
+                }
+            }
+
+            if ($firstElement)
+            {
+                $DOMDocument->replaceChild($firstElement, $htmlNode);
+            }
+        }
 
         $elementText = '';
 

@@ -21,7 +21,7 @@ if (empty($_SESSION[Constants::SESSION_ADMIN])) {
     exit;
 }
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
