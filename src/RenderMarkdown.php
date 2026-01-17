@@ -24,6 +24,8 @@ final class RenderMarkdown
         // setSafeMode(false) and setMarkupEscaped(false) are set. This breaks HTML
         // tags like <p>test</p> which become <p>&lt;p&gt;test&lt;&sol;p&gt;</p>
         // Our fix: globally decode all escaped entities back to proper HTML
+        // Note: decodeAllHtmlEntities() also applies our <img> attribute enhancements
+        // outside of code blocks.
         return self::decodeAllHtmlEntities($html);
     }
     
@@ -70,11 +72,62 @@ final class RenderMarkdown
                     '+', '^', '`', '|', '~', '{', '}',
                     '{', '}', '[', ']', '[', ']'
                 ], $part);
+
+                // Enhance <img> tags outside code blocks.
+                $part = self::addLazyImageAttributes($part);
             }
             // Code blocks remain untouched
             $result .= $part;
         }
         
         return $result;
+    }
+
+    /**
+     * Ensures that all <img> tags in the given HTML have:
+     *   loading="lazy" and decoding="async"
+     *
+     * Does not duplicate attributes and does not override explicit values.
+     */
+    private static function addLazyImageAttributes(string $html): string
+    {
+        if ($html === '' || stripos($html, '<img') === false) {
+            return $html;
+        }
+
+        return (string)preg_replace_callback('/<img\b[^>]*>/i', function(array $m): string {
+            $tag = $m[0];
+
+            $hasLoading = preg_match('/\bloading\s*=/i', $tag) === 1;
+            $hasDecoding = preg_match('/\bdecoding\s*=/i', $tag) === 1;
+            if ($hasLoading && $hasDecoding) {
+                return $tag;
+            }
+
+            $attrsToAdd = '';
+            if (!$hasLoading) {
+                $attrsToAdd .= ' loading="lazy"';
+            }
+            if (!$hasDecoding) {
+                $attrsToAdd .= ' decoding="async"';
+            }
+
+            // Insert before closing ">" while preserving self-closing form.
+            $pos = strrpos($tag, '>');
+            if ($pos === false) {
+                return $tag;
+            }
+
+            $before = substr($tag, 0, $pos);
+            $beforeTrimmed = rtrim($before);
+
+            $selfClosingSuffix = '';
+            if (str_ends_with($beforeTrimmed, '/')) {
+                $beforeTrimmed = rtrim(substr($beforeTrimmed, 0, -1));
+                $selfClosingSuffix = ' /';
+            }
+
+            return $beforeTrimmed . $attrsToAdd . $selfClosingSuffix . '>';
+        }, $html);
     }
 }
