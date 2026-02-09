@@ -828,11 +828,36 @@ img {
           $metaDate = $meta['timestamp'] ?? time();
           $shownDateValue = date('Y-m-d\\TH:i', $metaDate);
         }
+
+        // Static UTC hint (simple): compute based on configured blog timezone
+        // (admin.php sets date_default_timezone_set(Config::get('TIMEZONE'))).
+        $utcHint = '';
+        try {
+          $dtLocal = new \DateTimeImmutable($shownDateValue);
+          $dtUtc = $dtLocal->setTimezone(new \DateTimeZone('UTC'));
+
+          if (class_exists('IntlDateFormatter')) {
+            $fmt = new \IntlDateFormatter(
+              \Locale::getDefault(),
+              \IntlDateFormatter::LONG,
+              \IntlDateFormatter::SHORT,
+              'UTC'
+            );
+            $utcHint = (string)$fmt->format($dtUtc);
+          } else {
+            // Fallback if intl extension is not available
+            $utcHint = $dtUtc->format('Y-m-d H:i');
+          }
+        } catch (\Exception $e) {
+          $utcHint = '';
+        }
         ?>
-        <input type="datetime-local" name="date" value="<?= htmlspecialchars($shownDateValue, ENT_QUOTES) ?>" oninput="updateUtcDateDisplay()" onchange="updateUtcDateDisplay()">
+        <input type="datetime-local" name="date" value="<?= htmlspecialchars($shownDateValue, ENT_QUOTES) ?>">
         <input type="hidden" name="original_date" value="<?= htmlspecialchars($shownDateValue, ENT_QUOTES) ?>">
         <div class="utc-date-hint">
-          <span id="utc-date-display"></span>
+          <?php if ($utcHint !== ''): ?>
+            <span>UTC: <?= htmlspecialchars($utcHint, ENT_QUOTES) ?></span>
+          <?php endif; ?>
         </div>
       </div>
       <div>
@@ -2066,37 +2091,5 @@ function handleDragStop() {
   }
 }
 
-/* ==========================================================================
-   UTC DATE DISPLAY
-   Displays the corresponding UTC time for the local input (datetime-local)
-   to avoid misunderstandings.
-   Assumption: Input value represents local time.
-   ========================================================================== */
-function updateUtcDateDisplay() {
-  const inp = document.querySelector('input[name="date"]');
-  const out = document.getElementById('utc-date-display');
-  if (!inp || !out) return;
-  const v = inp.value; // Format YYYY-MM-DDTHH:MM (local time)
-  if (!v) { out.textContent = ''; return; }
-  // Interpretiere als lokale Zeit
-  const d = new Date(v);
-  if (isNaN(d.getTime())) { out.textContent = ''; return; }
-  
-  // Format UTC time in long format (e.g., "12. November 2025, 16:10 Uhr")
-  const utcDate = new Date(d.getTime());
-  const options = {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'UTC'
-  };
-  
-  const locale = document.documentElement.lang || 'de-DE';
-  const formatted = new Intl.DateTimeFormat(locale, options).format(utcDate);
-  
-  out.textContent = 'UTC: ' + formatted;
-}
 </script>
 </body></html>
