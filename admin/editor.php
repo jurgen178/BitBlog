@@ -334,6 +334,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title><?= $mode === 'new' ? Language::getText('new_post') : Language::getText('edit_post') ?></title>
 <link rel="stylesheet" href="<?= Config::BASE_URL() ?>/admin/admin.css">
 <script src="https://unpkg.com/monaco-editor@0.54.0/min/vs/loader.js"></script>
+
+<script>
+  // MathJax configuration (TeX) for $...$ and $$...$$ in the live preview.
+  // Note: Preview HTML is injected dynamically; we trigger typesetting in JS.
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 /* ==========================================================================
    BASE STYLES - Match blog typography
@@ -1135,6 +1151,26 @@ function updatePreview() {
   const markdown = monacoEditor.getValue();
   const previewContent = document.getElementById('preview-content');
   if (!previewContent) return;
+
+  const typesetPreviewMath = () => {
+    const mj = window.MathJax;
+    if (!mj) return;
+    const run = () => {
+      if (typeof mj.typesetPromise === 'function') {
+        try {
+          if (typeof mj.typesetClear === 'function') {
+            mj.typesetClear([previewContent]);
+          }
+          mj.typesetPromise([previewContent]).catch(() => {});
+        } catch (_) {}
+      }
+    };
+    if (mj.startup && mj.startup.promise) {
+      mj.startup.promise.then(run).catch(() => {});
+    } else {
+      run();
+    }
+  };
   
   // If editor is empty, show cue text
   if (!markdown.trim()) {
@@ -1166,6 +1202,9 @@ function updatePreview() {
     const oldScrollLeft = previewContent.scrollLeft;
 
     previewContent.innerHTML = data.success ? data.html : '<em>' + TRANSLATIONS.error + '</em>';
+
+    // Render TeX math after injecting new preview HTML.
+    typesetPreviewMath();
 
     // Restore scrollTop (clamped by browser if needed)
     if (Math.abs(previewContent.scrollTop - oldScrollTop) > 1) {

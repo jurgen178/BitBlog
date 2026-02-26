@@ -10,6 +10,39 @@ use BitBlog\Language;
 <title><?= Utils::e(($title ?? $siteTitle) . ' - ' . $siteTitle) ?></title>
 <link rel="stylesheet" href="<?= Utils::e($baseUrl) ?>/templates/style.css">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="<?= Utils::e($baseUrl) ?>/rss.php">
+
+<?php
+  // Load MathJax only when the page content likely contains TeX.
+  // This keeps most pages fast when they don't use math.
+  $__contentText = strip_tags((string)($content ?? ''));
+  $__hasMath = false;
+  if ($__contentText !== '') {
+    // Fast path: display-math or explicit TeX delimiters.
+    if (strpos($__contentText, '$$') !== false || strpos($__contentText, '\\(') !== false || strpos($__contentText, '\\[') !== false) {
+      $__hasMath = true;
+    } elseif (strpos($__contentText, '$') !== false) {
+      // Inline $...$ (best-effort heuristic to avoid most "$9.99" cases).
+      $__hasMath = preg_match('/(?<!\\\\)\$(?!\$)([^\n$]{1,250}?)(?<!\\\\)\$/', $__contentText) === 1;
+    }
+  }
+?>
+
+<?php if ($__hasMath): ?>
+  <script>
+    // MathJax configuration (TeX) for $...$ and $$...$$
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+<?php endif; ?>
 </head>
 <body>
 <header class="site-header">

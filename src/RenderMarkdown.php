@@ -16,8 +16,12 @@ final class RenderMarkdown
             self::$parsedown->setSafeMode(false);
             self::$parsedown->setMarkupEscaped(false);
         }
-        
-        $html = self::$parsedown->text($md);
+
+        // Math support: protect $...$ and $$...$$ from Markdown parsing.
+        // Without this, underscores/asterisks inside TeX get interpreted as emphasis.
+        [$mdProtected, $mathMap] = self::protectMathInMarkdown($md);
+
+        $html = self::$parsedown->text($mdProtected);
         
         // PARSEDOWN EXTRA BUG FIX:
         // ParsedownExtra escapes HTML entities in attributes and content, even when
@@ -26,7 +30,86 @@ final class RenderMarkdown
         // Our fix: globally decode all escaped entities back to proper HTML
         // Note: decodeAllHtmlEntities() also applies our <img> attribute enhancements
         // outside of code blocks.
-        return self::decodeAllHtmlEntities($html);
+        $html = self::decodeAllHtmlEntities($html);
+
+        // Restore math placeholders after HTML entity decoding.
+        return self::restoreMathPlaceholders($html, $mathMap);
+    }
+
+    /**
+     * Protects TeX math segments from Parsedown/Markdown emphasis parsing.
+     *
+     * Strategy:
+     * - Ignore fenced code blocks (```...``` and ~~~...~~~)
+     * - Replace $$...$$ (multiline) and $...$ (single-line) with placeholders
+     * - Restore placeholders after Markdown->HTML conversion
+     *
+     * @return array{0:string,1:array<string,string>} [protectedMarkdown, placeholderToMath]
+     */
+    private static function protectMathInMarkdown(string $md): array
+    {
+        if ($md === '' || (strpos($md, '$') === false)) {
+            return [$md, []];
+        }
+
+        $mathMap = [];
+        $counter = 0;
+
+        // Split by fenced code blocks, keep delimiters.
+        $parts = preg_split('/(```[\s\S]*?```|~~~[\s\S]*?~~~)/', $md, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($parts === false) {
+            return [$md, []];
+        }
+
+        foreach ($parts as $i => $part) {
+            // Odd indices are fenced code blocks; leave untouched.
+            if ($i % 2 === 1) {
+                continue;
+            }
+
+            // Display math: $$...$$ (can be multiline)
+            $part = (string)preg_replace_callback('/\$\$(.+?)\$\$/s', function(array $m) use (&$mathMap, &$counter): string {
+                $placeholder = '@@MATH' . $counter++ . '@@';
+                $mathMap[$placeholder] = '$$' . $m[1] . '$$';
+                return $placeholder;
+            }, $part);
+
+            // Inline math: $...$ (single-line). Avoid matching $$...$$ and escaped dollars.
+            $part = (string)preg_replace_callback('/(?<!\\\\)\$(?!\$)([^\n$]+?)(?<!\\\\)\$/', function(array $m) use (&$mathMap, &$counter): string {
+                $inner = trim($m[1]);
+
+                // Heuristic: don't treat pure numbers as math (e.g. "$9.99").
+                if ($inner !== '' && preg_match('/^[0-9][0-9.,]*$/', $inner) === 1) {
+                    return '$' . $m[1] . '$';
+                }
+
+                $placeholder = '@@MATH' . $counter++ . '@@';
+                $mathMap[$placeholder] = '$' . $m[1] . '$';
+                return $placeholder;
+            }, $part);
+
+            $parts[$i] = $part;
+        }
+
+        return [implode('', $parts), $mathMap];
+    }
+
+    /**
+     * Restores TeX segments into the final HTML.
+     * Values are escaped as text so they cannot inject HTML.
+     */
+    private static function restoreMathPlaceholders(string $html, array $mathMap): string
+    {
+        if ($html === '' || $mathMap === []) {
+            return $html;
+        }
+
+        // Replace placeholders with escaped TeX delimiters.
+        foreach ($mathMap as $placeholder => $math) {
+            $safeMath = htmlspecialchars($math, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $html = str_replace($placeholder, $safeMath, $html);
+        }
+        return $html;
     }
     
     /**
