@@ -13,7 +13,6 @@ final class Config
     public const RSS_POSTS_LIMIT = 100; // 0 = alle Posts
     public const TIMEZONE = 'UTC';
     public const DEFAULT_LANGUAGE = 'de';
-    public const SITE_URL = 'https://mysite.com/blog'; // Production URL fallback
 
     // Security (not configurable via admin)
     // ⚠️ IMPORTANT: Set your admin credentials here
@@ -161,8 +160,7 @@ final class Config
                 self::$baseUrlCache = $protocol . '://' . $host . $dir;
             } else {
                 // Fallback for CLI or when HTTP_HOST is not available
-                // Use a generic placeholder that can be configured per environment
-                self::$baseUrlCache = self::SITE_URL;
+                self::$baseUrlCache = '';
             }
         }
         return self::$baseUrlCache;
